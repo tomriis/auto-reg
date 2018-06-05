@@ -1,0 +1,14 @@
+# FSL Parameters
+
+# Brain Extraction Tool (BET)
+bet_input: /Applications/fsl/test_subj/acpc/T1.nii
+bet_output: /Applications/fsl/test_subj/acpc/T1_Brain.nii
+# Fractional Intensity Threshold (0>1); default=0.5
+f: 0.5
+# Vertical gradient in fractional intensity (-1->1); default=0
+g: 0
+
+# Segmentation (Fast)
+fast_input: /Applications/fsl/test_subj/acpc/T1
+fast_output_base: /Applications/fsl/test_subj/acpc/T1
+t:

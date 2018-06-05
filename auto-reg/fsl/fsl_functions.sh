@@ -13,4 +13,5 @@ function execute_flirt(){
 }
 
 
+"$@"
 

@@ -3,20 +3,16 @@
 # Brain Extraction Tool (bet)
 bet_input: /Applications/fsl/test_subj/acpc/T1
 bet_output: /Applications/fsl/test_subj/acpc/T1_Brain.nii
-# Fractional Intensity Threshold (0>1); default=0.5
-f: 0.5
-# Vertical gradient in fractional intensity (-1->1); default=0
-g: 0
+f: 0.5      # Fractional Intensity Threshold (0>1); default=0.5
+g: 0        # Vertical gradient in fractional intensity (-1->1); default=0
 
 # Segmentation (fast)
 fast_input: /Applications/fsl/test_subj/acpc/T1
 fast_output_base: /Applications/fsl/test_subj/acpc/T1
 t: 1        # type of image 1=T1 2=T2 3=PD; default = T1
 n: 3        # number of tissue type classes; default = 3
-# Segmentation spatial smoothness; default = 0.1
-H: 0.1
-# number of main loop iterations in bias field removal; default=4
-I: 4    
+H: 0.1      # Segmentation spatial smoothness; default = 0.1
+I: 4        # number of main loop iterations in bias field removal; default=4
 l: 20.0     # bias field smoothing extent (FWHM in mm); default=20
 
 # Registration Linear (flirt)

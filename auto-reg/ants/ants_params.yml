@@ -1,0 +1,13 @@
+# Parameters for Ants image registration functions
+
+antsRegistration
+fixed: /usr/local/fsl/data/standard/MNI152_T1_2mm_brain
+moving: /Applications/fsl/test_subj/acpc/T1.nii
+o: Diff_Result   # Output Prefix: prefix that is prepended to all output files
+t: s # Transform type (default = 's')
+     # r: rigid, a: rigid + affine, s: rigid + affine + deformable syn
+     # sr: rigid + deformable syn, so: deformable syn only,
+     # b: rigid+affine+deformable b-spline syn
+     # br: rigid + deformable b-spline syn
+     # bo: deformable b-spline syn only
+     

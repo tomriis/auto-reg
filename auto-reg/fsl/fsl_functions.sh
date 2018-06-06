@@ -12,6 +12,10 @@ function execute_flirt(){
     flirt -in $1 -ref $2 -out $3 -omat $4 -bins $5 -cost $6 -searchrx $7 -searchry $8 -searchrz $9 -dof $10 -interp $11
 }
 
+function execute_fnirt(){
+    fnirt --ref=$1 --in=$2
+}
+
 
 "$@"
 

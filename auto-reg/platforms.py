@@ -4,11 +4,19 @@ import subprocess
 import shlex
 
 
-class Fsl():
-    callstring = 'bash fsl/fsl_functions.sh'
-    params_file = 'fsl/fsl_params.yml'
+class Platform:
     def __init__(self):
-        self.p = get_params(Fsl.params_file)
+        self.p = {}
+        self.params_file = ''
+    def update_params(self):
+        self.p = get_params(self.params_file)
+
+class Fsl(Platform):
+    callstring = 'bash fsl/fsl_functions.sh'
+    def __init__(self):
+        super().__init__(self)
+        self.params_file = 'fsl/fsl_params.yml'  
+        self.p = get_params(self.params_file)
     def bet(self):
         opts=[Fsl.callstring,self.p['bet_input'],self.p['bet_output'], self.p['f'],self.p['g']]
         subprocess.call(opts)
@@ -18,4 +26,18 @@ class Fsl():
     def flirt(self):
         opts=[Fsl.callstring, self.p['flirt_in'], self.p['flirt_ref'], self.p['out'], self.p['omat'],self.p['bins'],self.p['cost'],self.p['searchrx'],self.p['searchry'],self.p['searchrz'],self.p['dof'],self.p['interp']]
         subprocess.call(opts)
-            
+    def fnirt(self):
+        opts=[Fsl.callstring, self.p['fnirt_ref'], self.p['fnirt_ref']]
+        subprocess.call(opts)
+
+class Ants(Platform):
+    callstring = 'bash ants/ants_functions.sh'
+    def __init__(self):
+        super().__init__(self)
+        self.params_file = 'ants/ants_params.yml'
+        self.p = get_params(self.params_file)
+    def antsRegistrationSynQuick(self):
+        opts=[Ants.callstring, self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
+        subprocess.call(opts)
+        
+        

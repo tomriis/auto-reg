@@ -1,4 +1,4 @@
-# Parameters for Ants image registration functions
+ #Parameters for Ants image registration functions
 
 antsRegistration
 fixed: /usr/local/fsl/data/standard/MNI152_T1_2mm_brain

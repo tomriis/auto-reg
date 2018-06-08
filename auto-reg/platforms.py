@@ -1,7 +1,6 @@
 
-from .utils import get_params
+import utils
 import subprocess
-import shlex
 
 try:
     import matlab.engine
@@ -16,57 +15,57 @@ except:
 
 
 
-class Platform:
+class Platform(object):
     def __init__(self):
         self.p = {}
         self.params_file = ''
     def update_params(self):
-        self.p = get_params(self.params_file)
+        self.p = utils.get_params(self.params_file)
 
 class Fsl(Platform):
-    callstring = 'bash fsl/fsl_functions.sh'
+    callstring = 'fsl/fsl_functions.sh'
     def __init__(self):
-        super().__init__(self)
+        super(Fsl, self).__init__()
         self.params_file = 'fsl/fsl_params.yml'  
-        self.p = get_params(self.params_file)
+        self.p = utils.get_params(self.params_file)
     def bet(self):
-        opts=[Fsl.callstring,'execute_bet',self.p['bet_input'],self.p['bet_output'], self.p['f'],self.p['g']]
+        opts=['bash',Fsl.callstring,'execute_bet',self.p['bet_input'],self.p['bet_output'], self.p['f'],self.p['g']]
         subprocess.call(opts)
     def fast(self):
-        opts=[Fsl.callstring,'execute_fast', self.p['t'],self.p['n'],self.p['H'],self.p['I'],self.p['l'],self.p['fast_output_base'],self.p['fast_input']]
+        opts=['bash',Fsl.callstring,'execute_fast', self.p['t'],self.p['n'],self.p['H'],self.p['I'],self.p['l'],self.p['fast_output_base'],self.p['fast_input']]
         subprocess.call(opts)
     def flirt(self):
-        opts=[Fsl.callstring,'execute_flirt', self.p['flirt_in'], self.p['flirt_ref'], self.p['out'], self.p['omat'],self.p['bins'],self.p['cost'],self.p['searchrx'],self.p['searchry'],self.p['searchrz'],self.p['dof'],self.p['interp']]
+        opts=['bash',Fsl.callstring,'execute_flirt', self.p['flirt_in'], self.p['flirt_ref'], self.p['out'], self.p['omat'],self.p['bins'],self.p['cost'],self.p['searchrx'],self.p['searchry'],self.p['searchrz'],self.p['dof'],self.p['interp']]
         subprocess.call(opts)
     def fnirt(self):
-        opts=[Fsl.callstring, 'execute_fnirt', self.p['fnirt_ref'], self.p['fnirt_ref']]
+        opts=['bash',Fsl.callstring, 'execute_fnirt', self.p['fnirt_ref'], self.p['fnirt_ref']]
         subprocess.call(opts)
 
 class Ants(Platform):
-    callstring = 'bash ants/ants_functions.sh'
+    callstring = 'ants/ants_functions.sh'
     def __init__(self):
-        super().__init__(self)
+        super(Ants, self).__init__()
         self.params_file = 'ants/ants_params.yml'
-        self.p = get_params(self.params_file)
+        self.p = utils.get_params(self.params_file)
     def antsRegistrationSynQuick(self):
-        opts=[Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
+        opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
         subprocess.call(opts)
         
 class SPM(Platform):
-	callstring = ''
-	def __init__(self):
-		super().__init__(self):
+    callstring = ''
+    def __init__(self):
+	super(SPM, self).__init__()
         self.params_file = 'spm/spm_params.yml'
-        self.p = get_params(self.params_file)
+        self.p = utils.get_params(self.params_file)
     def coregister_estimate_reslice(self):
         eng.coregister_estimate_reslice(self.p['ref_img'],self.p['source_img'])
-	def spm_D(self):
-		eng.spm_D()
+    def spm_D(self):
+	eng.spm_D()
 
 
 class Freesurfer(Platform):
     def __init__(self, subj, hem):
-        super().__init__(self):
+        super(Freesurfer, self).__init__()
         self.patient = img_pipe.freeCoG(subj=subj, hem = hem)
 
 

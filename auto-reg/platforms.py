@@ -21,6 +21,9 @@ class Platform(object):
         self.params_file = ''
     def update_params(self):
         self.p = utils.get_params(self.params_file)
+    def set_params(self, param_dict):
+        self.p.update(param_dict)
+        
 
 class Fsl(Platform):
     callstring = 'fsl/fsl_functions.sh'

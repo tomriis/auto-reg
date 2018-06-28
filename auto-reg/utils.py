@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-import yaml
+import ruamel.yaml
 
 def get_params(filename):
-    with open(filename, 'r') as stream:
-        try:
-            params = yaml.load(stream)
-        except yaml.YAMLError as exc:
-            raise Exception('Bad YAML File Read')
-            print(exc)
-    params = dict([a, str(x)] for a, x in params.items())
-    return params
-
+    with open(f, 'r') as _f:
+        return ruamel.yaml.round_trip_load(_f.read(), preserve_quotes=True)
+    
+def set_params(filename, params):
+    with open(filename, 'w') as _f:
+        _f.write(ruamel.yaml.dump(params, Dumper=ruamel.yaml.RoundTripDumper, width=1024))
 

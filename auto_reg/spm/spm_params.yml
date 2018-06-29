@@ -1,0 +1,5 @@
+# spm_params.yml
+
+#Coregistration - Estimate and reslice
+ref_img: 'C:\Users\Tom\Documents\MATLAB\subjects\test_subj\acpc\T1.nii'
+source_img: 'C:\Users\Tom\Documents\MATLAB\subjects\test_subj\acpc\CT.nii' 

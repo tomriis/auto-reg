@@ -1,9 +1,9 @@
-#auto-reg.py
+#auto_reg.py
 """ User interface for running all software pipelines on two files"""
 import os
-import Tkinter
-from Tkconstants import *
-tk = Tkinter.Tk()
+#import Tkinter
+#from Tkconstants import *
+#tk = Tkinter.Tk()
 
 import platforms
 import img_pipe
@@ -14,14 +14,14 @@ class Pipeline(object):
         self.subj = subj
         self.patient = img_pipe.freeCoG(subj=self.subj, hem = 'stereo')
        
-        self.platforms ={'fsl': platforms.Fsl(), 'ants':platforms.Ants(), 'spm':platform.SPM()}
+        self.platforms ={'fsl': platforms.Fsl(), 'ants':platforms.Ants(), 'spm':platforms.SPM()}
         self.CT = os.path.join(self.patient.CT_dir, 'CT.nii')
 
         self.T1 = os.path.join(self.patient.acpc_dir, 'T1.nii')
 
         self.coreg_out = {'fsl':os.path.join(self.patient.patient_dir,'coreg_fsl'),'ants': os.path.join(self.patient.patient_dir, 'coreg_ants'),'spm':os.path.join(self.patient.patient_dir, 'coreg_spm')}
 
-        self.methods = ['ants','spm','fsl','img_pipe']
+        self.methods = ['ants','spm','fsl']
 
         self.update_param_files()
         self.set_directory_structure()
@@ -37,14 +37,15 @@ class Pipeline(object):
             methods = self.methods
         for method in methods:
             if method == 'fsl':
-                pass
+                self.platforms['fsl'].flirt()
+                self.platforms['fsl'].fnirt()
             elif method == 'ants':
-                pass
+                self.platforms['ants'].antsRegistrationSynQuick()
             elif method == 'spm':
-                pass
+                print("Ran SPM--BOOM!")
     def evaluate(self):
         print('flim')
-    def update_params_files(self):
+    def update_param_files(self):
         self.update_input_files()
         self.update_ref_files()
         self.update_out_files()
@@ -61,10 +62,10 @@ class Pipeline(object):
         self.platforms['ants'].p['fixed'] = self.T1
         self.platforms['spm'].p['ref_img'] = self.T1
     def update_out_files(self):
-        self.platforms['fsl'].p['out']=self.coreg_out['fsl']+'/flirt_result'
-        self.platforms['fsl'].p['out']=self.coreg_out['fsl']+'/flirt_resutl.mat'
+        self.platforms['fsl'].p['out']=self.coreg_out['fsl']+'/flirt_out'
+        self.platforms['fsl'].p['omat']=self.coreg_out['fsl']+'/flirt_omat.mat'
+        self.platforms['fsl'].p['cout']=self.coreg_out['fsl']+'/fnirt_cout'
     def set_directory_structure(self):
         for method in self.methods:
-            if self.coreg_out[method]:
-                if not os.path.exists(self.coreg_out[method]):
-                    os.makedirs(self.coreg_out[method])
+            if not os.path.exists(self.coreg_out[method]):
+                os.makedirs(self.coreg_out[method])

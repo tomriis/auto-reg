@@ -3,7 +3,7 @@
 import ruamel.yaml
 
 def get_params(filename):
-    with open(f, 'r') as _f:
+    with open(filename, 'r') as _f:
         return ruamel.yaml.round_trip_load(_f.read(), preserve_quotes=True)
     
 def set_params(filename, params):

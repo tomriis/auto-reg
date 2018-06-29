@@ -17,9 +17,12 @@ function apply_flirt(){
 }
 
 function execute_fnirt(){
-    echo $(fnirt --ref=$1 --in=$2)
+    echo $(fnirt --ref=$1 --in=$2 --cout=$3)
 }
 
+function apply_fnirt(){
+    echo $(applywarp --ref=$1 --in=$2 --warp=$3 --out=$4)
+}
 
 "$@"
 

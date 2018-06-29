@@ -30,5 +30,5 @@ dof: 12           # number of transform degrees of freedom; default = 12
 interp: trilinear # {trilinear, nearestneighbour, sinc, spline}
 
 # Registration Non-Linear (fnirt)
-cout: /Applications/freesurfer/subjects/subj2/coreg_fsl/fnirt_cout
+cout: /Applications/freesurfer/subjects/subj2/coreg_fsl/fnirt_cout #main output, a 4D nifti-file containing the spline coefficients + affine transform
 

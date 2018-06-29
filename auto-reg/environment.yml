@@ -1,5 +1,0 @@
-pip install:
--argparse
--msgpack
--nibabel
--ruamel.yaml

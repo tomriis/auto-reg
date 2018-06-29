@@ -44,9 +44,11 @@ class Fsl(Platform):
     def fnirt(self):
         opts=['bash',Fsl.callstring, 'execute_fnirt', self.p['ref'], self.p['input'],self.p['cout']]
         subprocess.call(opts)
-    def apply_flirt(self, invol, refvol, invol2refvolmat):
-        opts=['bash',Fsl.callstring, 'apply_flirt',invol,refvol,invol2refvolmat]
+    def apply_flirt(self, invol, refvol, invol2refvolmat, out):
+        opts=['bash',Fsl.callstring, 'apply_flirt',invol,refvol,out, invol2refvolmat]
         subprocess.call(opts)
+    def apply_fnirt(self, invol, refvol, warp, out):
+        opts = ['bash',Fsl.callstring, 'apply_fnirt',refvol,invol,warp,out]
         
 class Ants(Platform):
     callstring = 'ants/ants_functions.sh'

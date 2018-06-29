@@ -21,8 +21,9 @@ class Platform(object):
         self.params_file = ''
     def update_params(self):
         self.p = utils.get_params(self.params_file)
-    def set_params(self, param_dict):
-        self.p.update(param_dict)
+    def set_params(self):
+        utils.set_params(self.params_file, self.p)
+        self.p = utils.get_params(self.params_file)
         
 
 class Fsl(Platform):
@@ -70,7 +71,5 @@ class Freesurfer(Platform):
     def __init__(self, subj, hem):
         super(Freesurfer, self).__init__()
         self.patient = img_pipe.freeCoG(subj=subj, hem = hem)
-
-
 
         

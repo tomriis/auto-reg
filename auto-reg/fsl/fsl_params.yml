@@ -15,9 +15,10 @@ H: 0.1      # Segmentation spatial smoothness; default = 0.1
 I: 4        # number of main loop iterations in bias field removal; default=4
 l: 20.0     # bias field smoothing extent (FWHM in mm); default=20
 
-# Registration Linear (flirt)
-flirt_in: /Applications/fsl/test_subj/CT/CT.nii
-flirt_ref: /Applications/fsl/test_subj/acpc/T1.nii #/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz
+# Registration
+input: /Applications/fsl/test_subj/CT/CT.nii
+ref: /Applications/fsl/test_subj/acpc/T1.nii #/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz
+Linear (flirt)
 out: /Applications/fsl/test_subj/acpc/flirt_result
 omat: /Applications/fsl/test_subj/acpc/flirt_result.mat
 bins: 256         # number of histogram bins; default = 256
@@ -29,6 +30,5 @@ dof: 12           # number of transform degrees of freedom; default = 12
 interp: trilinear # {trilinear, nearestneighbour, sinc, spline}
 
 # Registration Non-Linear (fnirt)
-fnert_in: /Applications/fsl/test_subj/CT/CT
-fnert_ref: /Applications/fsl/test_subj/acpc/T1 #/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz
+
 

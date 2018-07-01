@@ -65,6 +65,7 @@ class Pipeline(object):
         self.platforms['fsl'].p['out']=self.coreg_out['fsl']+'/flirt_out'
         self.platforms['fsl'].p['omat']=self.coreg_out['fsl']+'/flirt_omat.mat'
         self.platforms['fsl'].p['cout']=self.coreg_out['fsl']+'/fnirt_cout'
+        self.platforms['ants'].p['o']=self.coreg_out['ants']+'/ants_'
     def set_directory_structure(self):
         for method in self.methods:
             if not os.path.exists(self.coreg_out[method]):

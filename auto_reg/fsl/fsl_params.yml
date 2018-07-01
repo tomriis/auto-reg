@@ -19,8 +19,8 @@ l: 20.0     # bias field smoothing extent (FWHM in mm); default=20
 input: /Applications/freesurfer/subjects/subj2/CT/CT.nii
 ref: /Applications/freesurfer/subjects/subj2/acpc/T1.nii #/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz
 # Linear (flirt)
-out: /Applications/freesurfer/subjects/subj2/coreg_fsl/flirt_result
-omat: /Applications/freesurfer/subjects/subj2/coreg_fsl/flirt_result.mat
+out: /Applications/freesurfer/subjects/subj2/coreg_fsl/flirt_out
+omat: /Applications/freesurfer/subjects/subj2/coreg_fsl/flirt_omat.mat
 bins: 256         # number of histogram bins; default = 256
 cost: corratio    # {mutualinfo, corratio, normcorr, normmi, leastsq,labeldiff,bbr}; default=corratio
 searchrx: -90 90  # <min_angle> <max_angle> (angles in degrees; default= -90 90

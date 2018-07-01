@@ -49,7 +49,7 @@ class Fsl(Platform):
         subprocess.call(opts)
     def apply_fnirt(self, invol, refvol, warp, out):
         opts = ['bash',Fsl.callstring, 'apply_fnirt',refvol,invol,warp,out]
-        
+        subprocess.call(opts)
 class Ants(Platform):
     callstring = 'ants/ants_functions.sh'
     def __init__(self):
@@ -58,6 +58,9 @@ class Ants(Platform):
         self.p = utils.get_params(self.params_file)
     def antsRegistrationSynQuick(self):
         opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
+        subprocess.call(opts)
+    def antsApplyTransform(self, img_dim, in_img, ref, out, warp):
+        opts=['bash',Ants.callstring,'apply_antsApplyTransform',img_dim, in_img,ref, out, transformlist)
         subprocess.call(opts)
         
 class SPM(Platform):

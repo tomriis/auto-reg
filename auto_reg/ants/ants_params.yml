@@ -11,8 +11,8 @@ t: s # Transform type (default = 's')
      # br: rigid + deformable b-spline syn
      # bo: deformable b-spline syn only
      
-# applyAntsTransform
-d: 3	# dimension of image 2/3/4
+# Apply Ants Transform
+d: 3
 i: /Applications/freesurfer/subjects/subj2/CT/CT.nii
 o: /Applications/freesurfer/subjects/subj2/coreg_ants/outfile
 r: /Applications/freesurfer/subjects/subj2/acpc/T1.nii

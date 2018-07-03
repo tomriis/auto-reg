@@ -60,7 +60,7 @@ class Ants(Platform):
         opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
         subprocess.call(opts)
     def antsApplyTransform(self, img_dim, in_img, ref, out, warp):
-        opts=['bash',Ants.callstring,'apply_antsApplyTransform',img_dim, in_img,ref, out, transformlist)
+        opts=['bash',Ants.callstring,'apply_antsApplyTransform',str(img_dim), in_img,ref, out, transformlist)
         subprocess.call(opts)
         
 class SPM(Platform):

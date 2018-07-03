@@ -21,8 +21,9 @@ class Platform(object):
         self.params_file = ''
     def update_params(self):
         self.p = utils.get_params(self.params_file)
-    def set_params(self, param_dict):
-        self.p.update(param_dict)
+    def set_params(self):
+        utils.set_params(self.params_file, self.p)
+        self.p = utils.get_params(self.params_file)
         
 
 class Fsl(Platform):
@@ -32,18 +33,23 @@ class Fsl(Platform):
         self.params_file = 'fsl/fsl_params.yml'  
         self.p = utils.get_params(self.params_file)
     def bet(self):
-        opts=['bash',Fsl.callstring,'execute_bet',self.p['bet_input'],self.p['bet_output'], self.p['f'],self.p['g']]
+        opts=['bash',Fsl.callstring,'execute_bet',self.p['bet_input'],self.p['bet_output'], str(self.p['f']),str(self.p['g'])]
         subprocess.call(opts)
     def fast(self):
-        opts=['bash',Fsl.callstring,'execute_fast', self.p['t'],self.p['n'],self.p['H'],self.p['I'],self.p['l'],self.p['fast_output_base'],self.p['fast_input']]
+        opts=['bash',Fsl.callstring,'execute_fast', str(self.p['t']),str(self.p['n']),str(self.p['H']),str(self.p['I']),str(self.p['l']),self.p['fast_output_base'],self.p['fast_input']]
         subprocess.call(opts)
     def flirt(self):
-        opts=['bash',Fsl.callstring,'execute_flirt', self.p['flirt_in'], self.p['flirt_ref'], self.p['out'], self.p['omat'],self.p['bins'],self.p['cost'],self.p['searchrx'],self.p['searchry'],self.p['searchrz'],self.p['dof'],self.p['interp']]
+        opts=['bash',Fsl.callstring,'execute_flirt', self.p['input'], self.p['ref'], self.p['out'], self.p['omat'],str(self.p['bins']),self.p['cost'],self.p['searchrx'],self.p['searchry'],self.p['searchrz'],str(self.p['dof']),self.p['interp']]
         subprocess.call(opts)
     def fnirt(self):
-        opts=['bash',Fsl.callstring, 'execute_fnirt', self.p['fnirt_ref'], self.p['fnirt_ref']]
+        opts=['bash',Fsl.callstring, 'execute_fnirt', self.p['ref'], self.p['input'],self.p['cout']]
         subprocess.call(opts)
-
+    def apply_flirt(self, invol, refvol, invol2refvolmat, out):
+        opts=['bash',Fsl.callstring, 'apply_flirt',invol,refvol,out, invol2refvolmat]
+        subprocess.call(opts)
+    def apply_fnirt(self, invol, refvol, warp, out):
+        opts = ['bash',Fsl.callstring, 'apply_fnirt',refvol,invol,warp,out]
+        subprocess.call(opts)
 class Ants(Platform):
     callstring = 'ants/ants_functions.sh'
     def __init__(self):
@@ -52,6 +58,9 @@ class Ants(Platform):
         self.p = utils.get_params(self.params_file)
     def antsRegistrationSynQuick(self):
         opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
+        subprocess.call(opts)
+    def antsApplyTransform(self, img_dim, in_img, ref, out, warp):
+        opts=['bash',Ants.callstring,'apply_antsApplyTransform',str(img_dim), in_img,ref, out, transformlist)
         subprocess.call(opts)
         
 class SPM(Platform):
@@ -70,7 +79,5 @@ class Freesurfer(Platform):
     def __init__(self, subj, hem):
         super(Freesurfer, self).__init__()
         self.patient = img_pipe.freeCoG(subj=subj, hem = hem)
-
-
 
         

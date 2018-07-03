@@ -1,0 +1,5 @@
+# spm_params.yml
+
+#Coregistration - Estimate and reslice
+ref_img: '/Applications/freesurfer/subjects/subj2/acpc/T1.nii'
+source_img: '/Applications/freesurfer/subjects/subj2/CT/CT.nii'

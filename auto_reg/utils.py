@@ -10,9 +10,16 @@ def load_elecmatrix(filename):
     return mat['elecmatrix']
 
 def mat2csv(filename):
-    basename = os.path.splitext(filename)[0][0]
+    basename = os.path.splitext(filename)[0]
     mat = load_elecmatrix(filename)
     np.savetxt(basename+'.csv', mat, delimiter=",")
+    return basename+'.csv'
+
+def mat2img(filename):
+    basename = os.path.splitext(filename)[0]
+    mat = load_elecmatrix(filename)
+    np.savetxt(basename, mat, delimiter=" ")
+    return basename
     
 
 def get_params(filename):

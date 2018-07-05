@@ -48,8 +48,12 @@ class Pipeline(object):
     def apply_xfms2elecs(self):
         elecs_files = glob.glob(self.patient.elecs_dir+'/individual_elecs/*.mat')
         for elec in elecs_files:
-            outbasename = os.path.splitext(elec)[0][0]
+            outbasename = os.path.splitext(elec)[0]
             self.platforms['ants'].antsApplyTransformsToPoints(utils.mat2csv(elec),outbasename+'AntsXFM.csv', self.coreg_out) #TODO find what transform needs to be applied!
+            fsl_source = utils.mat2img(elec)
+            self.platforms['fsl'].apply_flirt2coords(fsl_source, outbasename+'fsl_xfm', self.coreg_out['fsl']) #TODO find what transforms need to be applied!
+            self.platforms['fsl'].apply_fnirt2coords(fsl_source, outbasename+'fsl_xfm', self.coreg_out['fsl']) #TODO find transform that needs to be applied by applying transforms to new CT MRI and troubleshooting registration process. What transforms/parameters give good reg
+            
         
     def evaluate(self):
         print('flim')

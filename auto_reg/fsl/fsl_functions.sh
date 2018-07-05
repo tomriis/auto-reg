@@ -16,6 +16,10 @@ function apply_flirt(){
     echo $(flirt -in $1 -ref $2 -out $3 --init $4 -applyxfm)
 }
 
+function apply_flirt2coords(){
+    echo $(img2imgcoord -src $1 -dest $2 -xfm $3)
+}
+
 function execute_fnirt(){
     echo $(fnirt --ref=$1 --in=$2 --cout=$3)
 }
@@ -23,6 +27,11 @@ function execute_fnirt(){
 function apply_fnirt(){
     echo $(applywarp --ref=$1 --in=$2 --warp=$3 --out=$4)
 }
+
+function apply_fnirt2coords(){
+    echo $(img2imgcoord -src $1 -dest $2 -warp $3)
+}
+
 
 "$@"
 

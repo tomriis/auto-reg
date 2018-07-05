@@ -3,7 +3,7 @@
 
 import nibabel as nib
 
-def load_file(nii_file):
+def load_file(nii_filename):
     n1_img = nib.load(nii_filename)
     return n1_img
 

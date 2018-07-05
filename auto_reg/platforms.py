@@ -50,6 +50,13 @@ class Fsl(Platform):
     def apply_fnirt(self, invol, refvol, warp, out):
         opts = ['bash',Fsl.callstring, 'apply_fnirt',refvol,invol,warp,out]
         subprocess.call(opts)
+    def apply_flirt2coords(self, src, dest, xfm):
+        opts = ['bash',Fsl.callstring, 'apply_flirt2coords',src, dest, xfm]
+        subprocess.call(opts)
+    def apply_fnirt2coords(self, src, dest, warp):
+        opts = ['bash',Fsl.callstring, 'apply_fnirt2coords',src,dest,warp]
+        subprocess.call(opts)
+
 
 class Ants(Platform):
     callstring = 'ants/ants_functions.sh'
@@ -61,10 +68,10 @@ class Ants(Platform):
         opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
         subprocess.call(opts)
     def antsApplyTransform(self, img_dim, in_img, ref, out, warp):
-        opts=['bash',Ants.callstring,'apply_antsApplyTransform',str(img_dim), in_img,ref, out, transformlist)
+        opts=['bash',Ants.callstring,'apply_antsApplyTransform',str(img_dim), in_img,ref, out, transformlist]
         subprocess.call(opts)
     def antsApplyTransformsToPoints(self, in_csv, out_csv, transforms, img_dim=3):
-        opts=['bash',Ants.callstring,'apply_antsApplyTransformsToPoints',string(img_dim), in_csv, out_csv, transforms)]
+        opts=['bash',Ants.callstring,'apply_antsApplyTransformsToPoints',string(img_dim), in_csv, out_csv, transforms]
         subprocess.call(opts)
         
 class SPM(Platform):

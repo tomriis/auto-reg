@@ -80,8 +80,8 @@ class SPM(Platform):
 	super(SPM, self).__init__()
         self.params_file = 'spm/spm_params.yml'
         self.p = utils.get_params(self.params_file)
-    def coregister_estimate_reslice(self):
-        eng.coregister_estimate_reslice(self.p['ref_img'],self.p['source_img'])
+    def coregister_estimat(self):
+        eng.coregister_estimate(self.p['ref_img'],self.p['source_img'], self.p['output_dir'])
     def spm_D(self):
 	eng.spm_D()
 

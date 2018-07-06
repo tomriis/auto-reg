@@ -44,7 +44,7 @@ class Pipeline(object):
             elif method == 'ants':
                 self.platforms['ants'].antsRegistrationSynQuick()
             elif method == 'spm':
-                print("Ran SPM--BOOM!")
+                self.platforms['spm'].coregister_estimate()
     def apply_xfms2elecs(self):
         elecs_files = glob.glob(self.patient.elecs_dir+'/individual_elecs/*.mat')
         for elec in elecs_files:
@@ -78,6 +78,7 @@ class Pipeline(object):
         self.platforms['fsl'].p['omat']=self.coreg_out['fsl']+'/flirt_omat.mat'
         self.platforms['fsl'].p['cout']=self.coreg_out['fsl']+'/fnirt_cout'
         self.platforms['ants'].p['o']=self.coreg_out['ants']+'/ants_'
+        self.platforms['spm'].p['output_dir']=os.path.join(self.patient.patient_dir,'/acpc/')
     def set_directory_structure(self):
         for method in self.platforms.keys():
             if not os.path.exists(self.coreg_out[method]):

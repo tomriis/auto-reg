@@ -67,8 +67,8 @@ class Ants(Platform):
     def antsRegistrationSynQuick(self):
         opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
         subprocess.call(opts)
-    def antsApplyTransform(self, img_dim, in_img, ref, out, warp):
-        opts=['bash',Ants.callstring,'apply_antsApplyTransform',str(img_dim), in_img,ref, out, transformlist]
+    def antsApplyTransforms(self,in_img, ref,warp, mat,out img_dim=3):
+        opts=['bash',Ants.callstring,'apply_antsApplyTransforms',str(img_dim), in_img,ref, warp, mat, out]
         subprocess.call(opts)
     def antsApplyTransformsToPoints(self, in_csv, out_csv, transforms, img_dim=3):
         opts=['bash',Ants.callstring,'apply_antsApplyTransformsToPoints',string(img_dim), in_csv, out_csv, transforms]
@@ -80,7 +80,7 @@ class SPM(Platform):
 	super(SPM, self).__init__()
         self.params_file = 'spm/spm_params.yml'
         self.p = utils.get_params(self.params_file)
-    def coregister_estimat(self):
+    def coregister_estimate(self):
         eng.coregister_estimate(self.p['ref_img'],self.p['source_img'], self.p['output_dir'])
     def spm_D(self):
 	eng.spm_D()

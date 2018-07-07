@@ -3,4 +3,4 @@
 #Coregistration - Estimate and reslice
 ref_img: '/Applications/freesurfer/subjects/subj1/acpc/T1.nii'
 source_img: '/Applications/freesurfer/subjects/subj1/CT/CT.nii'
-output_dir: '/Applications/freesurfer/subjects/subj1/acpc/'
+output_dir: '/acpc/'

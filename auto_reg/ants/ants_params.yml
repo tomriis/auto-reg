@@ -6,7 +6,7 @@ moving: /Applications/freesurfer/subjects/subj1/CT/CT.nii
 o: /Applications/freesurfer/subjects/subj1/coreg_ants/ants_ # Output Prefix: prefix that is prepended to all output files
 # For warping input images, the reference image defines the spacing
 # origin, size and direction of the output warped image
-t: /Applications/freesurfer/subjects/subj2/coreg_ants/ants_Warped.nii.gz # Transform type (default = 's')
+t: s                                                                     # Transform type (default = 's')
      # r: rigid, a: rigid + affine, s: rigid + affine + deformable syn
      # sr: rigid + deformable syn, so: deformable syn only,
      # b: rigid+affine+deformable b-spline syn
@@ -14,5 +14,5 @@ t: /Applications/freesurfer/subjects/subj2/coreg_ants/ants_Warped.nii.gz # Trans
      # bo: deformable b-spline syn only
 # Apply Ants Transform
 d: 3
-i: /Applications/freesurfer/subjects/subj2/CT/CT.nii
-r: /Applications/freesurfer/subjects/subj2/acpc/T1.nii
+i: /Applications/freesurfer/subjects/subj1/CT/CT.nii
+r: /Applications/freesurfer/subjects/subj1/acpc/T1.nii

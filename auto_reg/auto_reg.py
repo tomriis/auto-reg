@@ -47,12 +47,16 @@ class Pipeline(object):
                 self.platforms['spm'].coregister_estimate()
     def apply_xfms2elecs(self):
         elecs_files = glob.glob(self.patient.elecs_dir+'/individual_elecs/*.mat')
+        self.ants_warp = os.path.join(self.coreg_out['ants'],'ants_1Warp.nii.gz')
+        self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAfine.mat')
+        self.fnirt_warp = os.path.join(self.coreg_out['ants'],'fnirt_cout.nii.gz')
+        self.flirt_omat = os.path.join(self.coreg_out['ants'],'flirt_omat.mat')
         for elec in elecs_files:
             outbasename = os.path.splitext(elec)[0]
-            self.platforms['ants'].antsApplyTransformsToPoints(utils.mat2csv(elec),outbasename+'AntsXFM.csv', self.coreg_out) #TODO find what transform needs to be applied!
+            self.platforms['ants'].antsApplyTransformsToPoints(utils.mat2csv(elec),outbasename+'AntsXFM.csv', self.ants_warp, self.ants_mat)
             fsl_source = utils.mat2img(elec)
-            self.platforms['fsl'].apply_flirt2coords(fsl_source, outbasename+'fsl_xfm', self.coreg_out['fsl']) #TODO find what transforms need to be applied!
-            self.platforms['fsl'].apply_fnirt2coords(fsl_source, outbasename+'fsl_xfm', self.coreg_out['fsl']) #TODO find transform that needs to be applied by applying transforms to new CT MRI and troubleshooting registration process. What transforms/parameters give good reg
+            self.platforms['fsl'].apply_flirt2coords(fsl_source, outbasename+'fsl_xfm', self.flirt_omat)
+            self.platforms['fsl'].apply_fnirt2coords(fsl_source, outbasename+'fsl_xfm', self.fnirt_warp)
             
         
     def evaluate(self):
@@ -64,7 +68,6 @@ class Pipeline(object):
         self.platforms['fsl'].set_params()
         self.platforms['ants'].set_params()
         self.platforms['spm'].set_params()
-
     def update_input_files(self):
         self.platforms['fsl'].p['input']=self.patient.CT        
         self.platforms['ants'].p['moving'] = self.patient.CT

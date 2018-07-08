@@ -49,14 +49,16 @@ class Pipeline(object):
         elecs_files = glob.glob(self.patient.elecs_dir+'/individual_elecs/*.mat')
         self.ants_warp = os.path.join(self.coreg_out['ants'],'ants_1Warp.nii.gz')
         self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAfine.mat')
-        self.fnirt_warp = os.path.join(self.coreg_out['ants'],'fnirt_cout.nii.gz')
-        self.flirt_omat = os.path.join(self.coreg_out['ants'],'flirt_omat.mat')
+        self.fnirt_warp = os.path.join(self.coreg_out['fsl'],'fnirt_cout.nii.gz')
+        self.flirt_omat = os.path.join(self.coreg_out['fsl'],'flirt_omat.mat')
+    
         for elec in elecs_files:
             outbasename = os.path.splitext(elec)[0]
             self.platforms['ants'].antsApplyTransformsToPoints(utils.mat2csv(elec),outbasename+'AntsXFM.csv', self.ants_warp, self.ants_mat)
             fsl_source = utils.mat2img(elec)
-            self.platforms['fsl'].apply_flirt2coords(fsl_source, outbasename+'fsl_xfm', self.flirt_omat)
-            self.platforms['fsl'].apply_fnirt2coords(fsl_source, outbasename+'fsl_xfm', self.fnirt_warp)
+            self.platforms['fsl'].apply_flirt2coords(fsl_source, outbasename+'_flirt_xfm', self.flirt_omat)
+            self.platforms['fsl'].apply_fnirt2coords(fsl_source, outbasename+'_fnirt_xfm', self.fnirt_warp)
+            img_pipe.apply_transform(os.path.basename(outbasename), "VF2VG.mat")
             
         
     def evaluate(self):

@@ -67,11 +67,11 @@ class Ants(Platform):
     def antsRegistrationSynQuick(self):
         opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
         subprocess.call(opts)
-    def antsApplyTransforms(self,in_img, ref,warp, mat,out img_dim=3):
+    def antsApplyTransforms(self,in_img, ref,warp, mat,out, img_dim=3):
         opts=['bash',Ants.callstring,'apply_antsApplyTransforms',str(img_dim), in_img,ref, warp, mat, out]
         subprocess.call(opts)
-    def antsApplyTransformsToPoints(self, in_csv, out_csv, transforms, img_dim=3):
-        opts=['bash',Ants.callstring,'apply_antsApplyTransformsToPoints',string(img_dim), in_csv, out_csv, transforms]
+    def antsApplyTransformsToPoints(self, in_csv, out_csv, warp, mat, img_dim=3):
+        opts=['bash',Ants.callstring,'apply_antsApplyTransformsToPoints',str(img_dim), in_csv, out_csv, warp, mat]
         subprocess.call(opts)
         
 class SPM(Platform):

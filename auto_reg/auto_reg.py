@@ -29,7 +29,7 @@ class Pipeline(object):
         self.set_directory_structure()
 
         self.ants_warp = os.path.join(self.coreg_out['ants'],'ants_1Warp.nii.gz')
-        self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAfine.mat')
+        self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAffine.mat')
         self.fnirt_warp = os.path.join(self.coreg_out['fsl'],'fnirt_cout.nii.gz')
         self.flirt_omat = os.path.join(self.coreg_out['fsl'],'flirt_omat.mat')
         
@@ -58,25 +58,25 @@ class Pipeline(object):
             self.ants_xfm2elecs(elec)
             self.spm_xfm2elecs(elec)
             
-    def flirt_xfm2elecs(elec):
+    def flirt_xfm2elecs(self, elec):
         outbasename = os.path.splitext(elec)[0]
-        fsl_source = utils.mat2txt(elec)
+        fsl_source = utils.elecs2txt(elec)
         self.platforms['fsl'].apply_flirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.flirt_omat, outbasename+'_flirt_xfm.txt')
         utils.txt2elecs(outbasename+'_flirt_xfm.txt')
         
-    def fnirt_xfm2elecs(elec):
+    def fnirt_xfm2elecs(self, elec):
         outbasename = os.path.splitext(elec)[0]
-        fsl_source = utils.mat2txt(elec)
+        fsl_source = utils.elecs2txt(elec)
         self.platforms['fsl'].apply_fnirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.fnirt_warp, outbasename+'_fnirt_xfm.txt')
         utils.txt2elecs(outbasename+'_fnirt_xfm.txt')
         
-    def ants_xfm2elecs(elec):
+    def ants_xfm2elecs(self, elec):
         outbasename = os.path.splitext(elec)[0]
-        ants_source = utils.mat2csv(elec)
+        ants_source = utils.elecs2csv(elec)
         self.platforms['ants'].antsApplyTransformsToPoints(ants_source, outbasename+'_ants_xfm.csv', self.ants_warp, self.ants_mat)
         utils.csv2elecs(outbasename+'_ants_xfm.csv')
 
-    def spm_xfm2elecs(elec, reorient_file = None):
+    def spm_xfm2elecs(self, elec, reorient_file = None):
         if reorient_file == None:
             reorient_file = self.coreg_out['spm']+'/VF2VG.mat'
         utils.apply_spm(elec, reorient_file)

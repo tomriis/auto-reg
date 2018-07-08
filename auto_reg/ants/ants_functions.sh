@@ -10,7 +10,7 @@ function apply_antsApplyTransforms(){
 }
 
 function apply_antsApplyTransformsToPoints(){
-    echo $(antsApplyTransformsToPoints -d $1 -i $2 -o $3 -t $4 -t $5)
+    echo $(antsApplyTransformsToPoints -d $1 -i $2 -t $4 -t $5 -o $3)
 }
 
 

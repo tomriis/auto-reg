@@ -18,32 +18,37 @@ def save_elecmatrix(filename, mat):
 
 def apply_spm(elecs_file,reorient_file):
     elec = load_elecmatrix(elecs_file)
+    transform_name = os.path.basename(os.path.splitext(reorient_file)[0])
     rmat = scipy.io.loadmat(reorient_file)['M']
     elecs_reoriented = nib.affines.apply_affine(rmat,elec)
-    reoriented_elecs_file = os.path.splitext(elecs_file)[0]+'_reoriented.mat'
-    scipy.io.savemat(reoriented_elecs_file, {'elecmatrix':elecs_reoriented})
+    reoriented_elecs_file = os.path.splitext(elecs_file)[0]+'_spm_'+transform_name+'.mat'
+    save_elecmatrix(reoriented_elecs_file, elecs_reoriented)
 
-def csv2mat(filename):
+def csv2elecs(filename):
     basename = os.path.splitext(filename)[0]
     mat = np.loadtxt(open(filename, "rb"), delimiter=",")
     save_elecmatrix(basename+'.mat', mat)
 
-def txt2mat(filename):
+def txt2elecs(filename):
     basename = os.path.splitext(filename)[0]
-    mat = np.loadtxt(open(filename, "rb"), delimiter=" ")
+    try:
+        mat = np.loadtxt(open(filename, "rb"), delimiter=" ")
+    except:
+        mat = np.loadtxt(open(filename, "rb"), delimiter="  ")
+        
     save_elecmatrix(basename+'.mat',mat)
 
-def mat2csv(filename):
+def elecs2csv(filename):
     basename = os.path.splitext(filename)[0]
     mat = load_elecmatrix(filename)
     np.savetxt(basename+'.csv', mat, delimiter=",")
     return basename+'.csv'
 
-def mat2txt(filename):
+def elecs2txt(filename):
     basename = os.path.splitext(filename)[0]
     mat = load_elecmatrix(filename)
     np.savetxt(basename+'.txt', mat, delimiter=" ")
-    return basename
+    return basename+'.txt'
     
 def get_params(filename):
     with open(filename, 'r') as _f:

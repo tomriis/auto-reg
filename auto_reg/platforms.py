@@ -50,11 +50,11 @@ class Fsl(Platform):
     def apply_fnirt(self, invol, refvol, warp, out):
         opts = ['bash',Fsl.callstring, 'apply_fnirt',refvol,invol,warp,out]
         subprocess.call(opts)
-    def apply_flirt2coords(self, src, dest, xfm):
-        opts = ['bash',Fsl.callstring, 'apply_flirt2coords',src, dest, xfm]
+    def apply_flirt2coords(self,coordfile, src, dest, xfm, outfile):
+        opts = ['bash',Fsl.callstring, 'apply_flirt2coords',coordfile, src, dest, xfm, outfile]
         subprocess.call(opts)
-    def apply_fnirt2coords(self, src, dest, warp):
-        opts = ['bash',Fsl.callstring, 'apply_fnirt2coords',src,dest,warp]
+    def apply_fnirt2coords(self,coordfile, src, dest, warp, outfile):
+        opts = ['bash',Fsl.callstring, 'apply_fnirt2coords',coordfile, src,dest,warp, outfile]
         subprocess.call(opts)
 
 

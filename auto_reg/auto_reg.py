@@ -24,9 +24,14 @@ class Pipeline(object):
         self.coreg_out = {'fsl':os.path.join(self.patient.patient_dir,'coreg_fsl'),
                           'ants': os.path.join(self.patient.patient_dir, 'coreg_ants'),
                           'spm':os.path.join(self.patient.patient_dir, 'coreg_spm')}
-
+        
         self.update_param_files()
         self.set_directory_structure()
+
+        self.ants_warp = os.path.join(self.coreg_out['ants'],'ants_1Warp.nii.gz')
+        self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAfine.mat')
+        self.fnirt_warp = os.path.join(self.coreg_out['fsl'],'fnirt_cout.nii.gz')
+        self.flirt_omat = os.path.join(self.coreg_out['fsl'],'flirt_omat.mat')
         
     def preprocess(self):
         self.patient.prep_recon()
@@ -46,20 +51,35 @@ class Pipeline(object):
             elif method == 'spm':
                 self.platforms['spm'].coregister_estimate()
     def apply_xfms2elecs(self):
-        elecs_files = glob.glob(self.patient.elecs_dir+'/individual_elecs/*.mat')
-        self.ants_warp = os.path.join(self.coreg_out['ants'],'ants_1Warp.nii.gz')
-        self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAfine.mat')
-        self.fnirt_warp = os.path.join(self.coreg_out['fsl'],'fnirt_cout.nii.gz')
-        self.flirt_omat = os.path.join(self.coreg_out['fsl'],'flirt_omat.mat')
-    
+        elecs_files = glob.glob(self.patient.elecs_dir+'/individual_elecs/*.mat')   
         for elec in elecs_files:
-            outbasename = os.path.splitext(elec)[0]
-            self.platforms['ants'].antsApplyTransformsToPoints(utils.mat2csv(elec),outbasename+'AntsXFM.csv', self.ants_warp, self.ants_mat)
-            fsl_source = utils.mat2img(elec)
-            self.platforms['fsl'].apply_flirt2coords(fsl_source, outbasename+'_flirt_xfm', self.flirt_omat)
-            self.platforms['fsl'].apply_fnirt2coords(fsl_source, outbasename+'_fnirt_xfm', self.fnirt_warp)
-            img_pipe.apply_transform(os.path.basename(outbasename), "VF2VG.mat")
+            self.flirt_xfm2elecs(elec)
+            self.fnirt_xfm2elecs(elec)
+            self.ants_xfm2elecs(elec)
+            self.spm_xfm2elecs(elec)
             
+    def flirt_xfm2elecs(elec):
+        outbasename = os.path.splitext(elec)[0]
+        fsl_source = utils.mat2txt(elec)
+        self.platforms['fsl'].apply_flirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.flirt_omat, outbasename+'_flirt_xfm.txt')
+        utils.txt2elecs(outbasename+'_flirt_xfm.txt')
+        
+    def fnirt_xfm2elecs(elec):
+        outbasename = os.path.splitext(elec)[0]
+        fsl_source = utils.mat2txt(elec)
+        self.platforms['fsl'].apply_fnirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.fnirt_warp, outbasename+'_fnirt_xfm.txt')
+        utils.txt2elecs(outbasename+'_fnirt_xfm.txt')
+        
+    def ants_xfm2elecs(elec):
+        outbasename = os.path.splitext(elec)[0]
+        ants_source = utils.mat2csv(elec)
+        self.platforms['ants'].antsApplyTransformsToPoints(ants_source, outbasename+'_ants_xfm.csv', self.ants_warp, self.ants_mat)
+        utils.csv2elecs(outbasename+'_ants_xfm.csv')
+
+    def spm_xfm2elecs(elec, reorient_file = None):
+        if reorient_file == None:
+            reorient_file = self.coreg_out['spm']+'/VF2VG.mat'
+        utils.apply_spm(elec, reorient_file)
         
     def evaluate(self):
         print('flim')

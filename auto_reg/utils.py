@@ -41,6 +41,7 @@ def txt2elecs(filename):
 def elecs2csv(filename):
     basename = os.path.splitext(filename)[0]
     mat = load_elecmatrix(filename)
+    mat = np.vstack((np.array([0,0,0]), mat))
     np.savetxt(basename+'.csv', mat, delimiter=",")
     return basename+'.csv'
 
@@ -61,3 +62,8 @@ def set_params(filename, params):
 def load_file(nii_filename):
     n1_img = nib.load(nii_filename)
     return n1_img
+
+def resave_data(nifti_orig, data):
+    hdr = nifti_orig.header.copy()
+    new_img = nib.nifti1.Nifti1Image(data, None, header = hdr)
+    return new_img

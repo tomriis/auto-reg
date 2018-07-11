@@ -17,7 +17,7 @@ function apply_flirt(){
 }
 
 function apply_flirt2coords(){
-    echo $(cat $1 | img2imgcoord -src $2 -dest $3 -xfm $4 - > $5)
+    echo $(cat $1 | img2imgcoord -mm -src $2 -dest $3 -xfm $4 - > $5)
     sed '1d' $5 > tmp.txt
     mv tmp.txt $5
 }
@@ -31,7 +31,7 @@ function apply_fnirt(){
 }
 
 function apply_fnirt2coords(){
-    echo $(cat $1 | img2imgcoord -src $2 -dest $3 -warp $4 - > $5)
+    echo $(cat $1 | img2imgcoord -mm -src $2 -dest $3 -warp $4 - > $5)
     sed '1d' $5 > tmp.txt
     mv tmp.txt $5
     

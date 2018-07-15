@@ -6,7 +6,24 @@ import numpy as np
 import os
 import nibabel as nib
 from datetime import datetime
+import csv
 
+def save_fcsv(filename, mat):
+
+def load_fcsv2list(filename):
+    content = []
+    with open(filename,'rb') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            content.append(row)
+    return content
+
+def fcsv2mat(filename):
+    content = load_fcsv2list(filename)
+    mat = []
+    for i in range(3,len(content)):
+        mat.append(np.array(content[i][1:4]).astype(np.float))
+    return np.vstack(mat)
 
 def load_elecmatrix(filename):
     mat = scipy.io.loadmat(filename)
@@ -15,19 +32,42 @@ def load_elecmatrix(filename):
 def save_elecmatrix(filename, mat):
     scipy.io.savemat(filename, {'__globals__':[], '__header__':'MATLAB 5.0 MAT-file Platform: posix, Created on: '+str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                                 '__version__':'1.0', 'elecmatrix': mat})
+def mm2vox(filename, nii):
+    if isinstance(nii, str):
+        nii = load_file(nii)
+    mat = load_elecmatrix(filename)
+    inv = np.linalg.inv(nii.affine)
+    vox_coords = nib.affines.apply_affine(inv,mat)
+    out_filename = os.path.splitext(filename)[0]+'_vox.mat'
+    save_elecmatrix(out_filename, vox_coords)
+    return out_filename
 
+def vox2mm(filename, nii):
+    if isinstance(nii, str):
+        nii = load_file(nii)
+    mat = load_elecmatrix(filename)
+    mm_coords = nib.affines.apply_affine(nii.affine,mat)
+    out_filename = os.path.splitext(filename)[0]+'_mm.mat'
+    save_elecmatrix(out_filename, mm_coords)
+    return out_filename
+    
+    
 def apply_spm(elecs_file,reorient_file):
     elec = load_elecmatrix(elecs_file)
     transform_name = os.path.basename(os.path.splitext(reorient_file)[0])
     rmat = scipy.io.loadmat(reorient_file)['M']
     elecs_reoriented = nib.affines.apply_affine(rmat,elec)
+    np.savetxt(os.path.splitext(elecs_file)[0]+'_spm'+'.csv', elecs_reoriented, delimiter=",")
     reoriented_elecs_file = os.path.splitext(elecs_file)[0]+'_spm_'+transform_name+'.mat'
     save_elecmatrix(reoriented_elecs_file, elecs_reoriented)
 
-def csv2elecs(filename):
+def csv2elecs(filename, fromLPS=False):
     basename = os.path.splitext(filename)[0]
     mat = np.loadtxt(open(filename, "rb"), delimiter=",")
-    save_elecmatrix(basename+'.mat', mat)
+    if fromLPS:
+        M = np.diag([-1,-1,1])
+        mat = M.dot(mat.T).T
+    save_fcsv(basename+'.fcsv', mat)
 
 def txt2elecs(filename):
     basename = os.path.splitext(filename)[0]
@@ -36,18 +76,27 @@ def txt2elecs(filename):
     except:
         mat = np.loadtxt(open(filename, "rb"), delimiter="  ")
         
-    save_elecmatrix(basename+'.mat',mat)
+    save_fcsv(basename+'.fcsv',mat)
 
-def elecs2csv(filename):
+def elecs2csv(filename, toLPS = False, mat = False):
     basename = os.path.splitext(filename)[0]
-    mat = load_elecmatrix(filename)
+    try:
+        mat.shape
+    except:
+        mat = load_elecmatrix(filename)
+    if toLPS:
+        M = np.diag([-1,-1,1])
+        mat = M.dot(mat.T).T
     mat = np.vstack((np.array([0,0,0]), mat))
     np.savetxt(basename+'.csv', mat, delimiter=",")
     return basename+'.csv'
 
-def elecs2txt(filename):
+def elecs2txt(filename, mat = False):
     basename = os.path.splitext(filename)[0]
-    mat = load_elecmatrix(filename)
+    try:
+        mat.shape
+    except:
+        mat = load_elecmatrix(filename)
     np.savetxt(basename+'.txt', mat, delimiter=" ")
     return basename+'.txt'
     

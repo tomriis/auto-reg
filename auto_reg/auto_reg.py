@@ -52,7 +52,7 @@ class Pipeline(object):
             elif method == 'spm':
                 self.platforms['spm'].coregister_estimate()
     def apply_xfms2elecs(self):
-        elecs_files = glob.glob(self.patient.elecs_dir+'/individual_elecs/*.mat')   
+        elecs_files = glob.glob(self.patient.elecs_dir+'/*.fcsv')   
         for elec in elecs_files:
             self.flirt_xfm2elecs(elec)
             self.fnirt_xfm2elecs(elec)
@@ -61,25 +61,28 @@ class Pipeline(object):
             
     def flirt_xfm2elecs(self, elec):
         outbasename = os.path.splitext(elec)[0]
-        fsl_source = utils.elecs2txt(elec)
+        fmat = fcsv2mat(elec)
+        fsl_source = utils.elecs2txt(elec, mat = fmat)
         self.platforms['fsl'].apply_flirt2coords(fsl_source, self.patient.CT, self.coreg_out['fsl']+'/flirt_out.nii', self.flirt_omat, outbasename+'_flirt_xfm.txt')
         utils.txt2elecs(outbasename+'_flirt_xfm.txt')
         
     def fnirt_xfm2elecs(self, elec):
         outbasename = os.path.splitext(elec)[0]
-        fsl_source = utils.elecs2txt(elec)
+        fmat = fcsv2mat(elec)
+        fsl_source = utils.elecs2txt(elec,mat=fmat)
         self.platforms['fsl'].apply_fnirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.fnirt_warp, outbasename+'_fnirt_xfm.txt')
         utils.txt2elecs(outbasename+'_fnirt_xfm.txt')
         
-    def ants_xfm2elecs(self, elec):
+    def ants_xfm2elecs(self, elec, RAS=True):
         outbasename = os.path.splitext(elec)[0]
-        ants_source = utils.elecs2csv(elec)
-        self.platforms['ants'].antsApplyTransformsToPoints(ants_source, outbasename+'_ants_xfm_s.csv', self.ants_warp, self.ants_mat)
-        utils.csv2elecs(outbasename+'_ants_xfm_s.csv')
+        fmat = fcsv2mat(elec)
+        ants_source = utils.elecs2csv(elec, toLPS=RAS, mat = fmat)
+        self.platforms['ants'].antsApplyTransformsToPoints(ants_source, outbasename+'_ants_xfm.csv', self.ants_invwarp, self.ants_mat)
+        utils.csv2elecs(outbasename+'_ants_xfm.csv', fromLPS=RAS)
 
     def spm_xfm2elecs(self, elec, reorient_file = None):
         if reorient_file == None:
-            reorient_file = self.coreg_out['spm']+'/VF2VG.mat'
+            reorient_file = self.coreg_out['spm']+'/matrix.mat'
         utils.apply_spm(elec, reorient_file)
         
     def evaluate(self):

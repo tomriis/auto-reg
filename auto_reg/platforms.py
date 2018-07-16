@@ -50,6 +50,14 @@ class Fsl(Platform):
     def apply_fnirt(self, invol, refvol, warp, out):
         opts = ['bash',Fsl.callstring, 'apply_fnirt',refvol,invol,warp,out]
         subprocess.call(opts)
+    def apply_flirt2coords(self,coordfile, src, dest, xfm, outfile):
+        opts = ['bash',Fsl.callstring, 'apply_flirt2coords',coordfile, src, dest, xfm, outfile]
+        subprocess.call(opts)
+    def apply_fnirt2coords(self,coordfile, src, dest, warp, outfile):
+        opts = ['bash',Fsl.callstring, 'apply_fnirt2coords',coordfile, src,dest,warp, outfile]
+        subprocess.call(opts)
+
+
 class Ants(Platform):
     callstring = 'ants/ants_functions.sh'
     def __init__(self):
@@ -59,8 +67,11 @@ class Ants(Platform):
     def antsRegistrationSynQuick(self):
         opts=['bash',Ants.callstring,'execute_antsRegistrationSyNQuick', self.p['fixed'],self.p['moving'], self.p['t'],self.p['o']]
         subprocess.call(opts)
-    def antsApplyTransform(self, img_dim, in_img, ref, out, warp):
-        opts=['bash',Ants.callstring,'apply_antsApplyTransform',str(img_dim), in_img,ref, out, transformlist)
+    def antsApplyTransforms(self,in_img, ref,warp, mat,out, img_dim=3):
+        opts=['bash',Ants.callstring,'apply_antsApplyTransforms',str(img_dim), in_img,ref, warp, mat, out]
+        subprocess.call(opts)
+    def antsApplyTransformsToPoints(self, in_csv, out_csv, warp, mat, img_dim=3):
+        opts=['bash',Ants.callstring,'apply_antsApplyTransformsToPoints',str(img_dim), in_csv, out_csv, warp, mat]
         subprocess.call(opts)
         
 class SPM(Platform):
@@ -69,8 +80,8 @@ class SPM(Platform):
 	super(SPM, self).__init__()
         self.params_file = 'spm/spm_params.yml'
         self.p = utils.get_params(self.params_file)
-    def coregister_estimate_reslice(self):
-        eng.coregister_estimate_reslice(self.p['ref_img'],self.p['source_img'])
+    def coregister_estimate(self):
+        eng.coregister_estimate(self.p['ref_img'],self.p['source_img'], self.p['output_dir'])
     def spm_D(self):
 	eng.spm_D()
 

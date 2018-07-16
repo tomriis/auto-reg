@@ -8,7 +8,7 @@ import nibabel as nib
 from datetime import datetime
 import csv
 
-def save_fcsv(fcsv_file,xfm_file, mat):
+def save_fcsv(fcsv_file,xfm_file, mat, rmv = True):
     content = load_fcsv2list(fcsv_file)
     outbasename = os.path.splitext(xfm_file)[0]
     for i in range(3, len(content)):
@@ -17,6 +17,8 @@ def save_fcsv(fcsv_file,xfm_file, mat):
         writer = csv.writer(csvfile, delimiter=',')
         for row in content:
             writer.writerow(row)
+    if rmv == True:
+        os.remove(xfm_file)
     return outbasename+'.fcsv'
         
     
@@ -67,9 +69,9 @@ def apply_spm(elecs_file,reorient_file):
     elec_mat = fcsv2mat(elecs_file)
     transform_name = os.path.basename(os.path.splitext(reorient_file)[0])
     rmat = scipy.io.loadmat(reorient_file)['M']
-    elec_mat = np.diag([1,-1,1]).dot(elec_mat.T).T
-    elecs_reoriented = nib.affines.apply_affine(rmat,elec_mat)
-    elecs_reoriented = np.diag([1,-1,1]).dot(elecs_reoriented.T).T
+    #elec_mat = np.diag([1,-1,1]).dot(elec_mat.T).T
+    elecs_reoriented = nib.affines.apply_affine(np.linalg.inv(rmat),elec_mat)
+    #elecs_reoriented = np.diag([1,-1,1]).dot(elecs_reoriented.T).T
     xfm_file=os.path.splitext(elecs_file)[0]+'_xfm_spm'+'.csv'
     np.savetxt(xfm_file, elecs_reoriented, delimiter=",")
     save_fcsv(elecs_file, xfm_file, elecs_reoriented)

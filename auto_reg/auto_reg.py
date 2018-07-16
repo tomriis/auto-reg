@@ -55,6 +55,7 @@ class Pipeline(object):
     def apply_xfms2elecs(self):
         elecs_files = glob.glob(self.patient.elecs_dir+'/*.fcsv')   
         for elec in elecs_files:
+            print("---- Processing : "+elec)
             self.flirt_xfm2elecs(elec)
             self.fnirt_xfm2elecs(elec)
             self.ants_xfm2elecs(elec)
@@ -86,7 +87,7 @@ class Pipeline(object):
         self.platforms['ants'].antsApplyTransformsToPoints(ants_source, xfm_file, self.ants_invwarp, self.ants_mat)
         rmat = utils.csv2mat(xfm_file, fromLPS=RAS)
         utils.save_fcsv(elec, xfm_file, rmat)
-
+        
     def spm_xfm2elecs(self, elec, reorient_file = None):
         if reorient_file == None:
             reorient_file = self.coreg_out['spm']+'/matrix.mat'
@@ -122,17 +123,18 @@ class Pipeline(object):
 
 class Metrics(object):
     def __init__(self):
-        self.xfms =  {'ants': [], 'flirt': [], 'fnirt': []}
-        self.pairwise_diff = {}
+        self.xfms =  {'ants': [], 'flirt': [],'spm':[], 'fnirt': []}
+        self.elecs_groups = {}
         
     def pairwise_difference(self, elecs_files):
         self.set_xfms_dict(elecs_files)
         keys = self.xfms.keys()
+        pairwise_diff = {}
         for i in range(len(keys)-1):
             for j in range(i+1,len(keys)):
                 dist = np.sqrt((self.xfms[keys[i]]-self.xfms[keys[j]])**2.0)
-                self.pairwise_diff[keys[i]+'_v_'+keys[j]] = dist
-        return self.pairwise_diff
+                pairwise_diff[keys[i]+'_v_'+keys[j]] = dist
+        return pairwise_diff
     
     def set_xfms_dict(self, elecs_files):
         keys = self.xfms.keys()
@@ -140,4 +142,23 @@ class Metrics(object):
             for elec in elecs_files:
                 if key in elec:
                     self.xfms[key] = utils.fcsv2mat(elec)
+    def group_by_base(self, elecs_files, basename):
+        # Groups list of elec files by the number following the basename
+        base = os.path.dirname(elecs_files[0])+'/'+basename
+        groups = np.unique([elec[len(base):len(base)+2] for elec in elecs_files])
+        for num in groups:
+            self.elecs_groups[basename+num] = [f for f in elecs_files if base+num in f]
+        return self.elecs_groups
+    def concat_all(self, elecs_dict):
+        keys = self.xfms.keys()
+        diffs_all = {}
+        for i in range(len(keys)-1):
+            for j in range(i+1,len(keys)):
+                current_pair = keys[i]+'_v_'+keys[j]
+                diffs_all[current_pair] = np.array([]).reshape(0,3)
+                for group in elecs_dict.keys():
+                    for pair in elecs_dict[group].keys():
+                        if keys[i] in pair and keys[j] in pair:
+                            diffs_all[current_pair]=np.concatenate((diffs_all[current_pair], elecs_dict[group][pair]), axis = 0)
+        return diffs_all
         

@@ -9,6 +9,7 @@ import glob
 import platforms
 import img_pipe
 import utils
+import numpy as np
 
 class Pipeline(object):
     def __init__(self,subj):
@@ -61,24 +62,30 @@ class Pipeline(object):
             
     def flirt_xfm2elecs(self, elec):
         outbasename = os.path.splitext(elec)[0]
-        fmat = fcsv2mat(elec)
+        xfm_file = outbasename+'_xfm_flirt.txt'
+        fmat = utils.fcsv2mat(elec)
         fsl_source = utils.elecs2txt(elec, mat = fmat)
-        self.platforms['fsl'].apply_flirt2coords(fsl_source, self.patient.CT, self.coreg_out['fsl']+'/flirt_out.nii', self.flirt_omat, outbasename+'_flirt_xfm.txt')
-        utils.txt2elecs(outbasename+'_flirt_xfm.txt')
+        self.platforms['fsl'].apply_flirt2coords(fsl_source, self.patient.CT, self.coreg_out['fsl']+'/flirt_out.nii', self.flirt_omat, xfm_file)
+        rmat = utils.txt2mat(xfm_file)
+        utils.save_fcsv(elec, xfm_file, rmat)
         
     def fnirt_xfm2elecs(self, elec):
         outbasename = os.path.splitext(elec)[0]
-        fmat = fcsv2mat(elec)
+        xfm_file = outbasename+'_xfm_fnirt.txt'
+        fmat = utils.fcsv2mat(elec)
         fsl_source = utils.elecs2txt(elec,mat=fmat)
-        self.platforms['fsl'].apply_fnirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.fnirt_warp, outbasename+'_fnirt_xfm.txt')
-        utils.txt2elecs(outbasename+'_fnirt_xfm.txt')
+        self.platforms['fsl'].apply_fnirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.fnirt_warp, xfm_file)
+        rmat = utils.txt2mat(xfm_file)
+        utils.save_fcsv(elec, xfm_file, rmat)
         
     def ants_xfm2elecs(self, elec, RAS=True):
         outbasename = os.path.splitext(elec)[0]
-        fmat = fcsv2mat(elec)
+        xfm_file = outbasename+'_xfm_ants.csv'
+        fmat = utils.fcsv2mat(elec)
         ants_source = utils.elecs2csv(elec, toLPS=RAS, mat = fmat)
-        self.platforms['ants'].antsApplyTransformsToPoints(ants_source, outbasename+'_ants_xfm.csv', self.ants_invwarp, self.ants_mat)
-        utils.csv2elecs(outbasename+'_ants_xfm.csv', fromLPS=RAS)
+        self.platforms['ants'].antsApplyTransformsToPoints(ants_source, xfm_file, self.ants_invwarp, self.ants_mat)
+        rmat = utils.csv2mat(xfm_file, fromLPS=RAS)
+        utils.save_fcsv(elec, xfm_file, rmat)
 
     def spm_xfm2elecs(self, elec, reorient_file = None):
         if reorient_file == None:
@@ -86,7 +93,7 @@ class Pipeline(object):
         utils.apply_spm(elec, reorient_file)
         
     def evaluate(self):
-        print('flim')
+        elecs_files = glob.glob(self.patient.elecs_dir+'/*.fcsv')
     def update_param_files(self):
         self.update_input_files()
         self.update_ref_files()
@@ -115,5 +122,22 @@ class Pipeline(object):
 
 class Metrics(object):
     def __init__(self):
-        pass
+        self.xfms =  {'ants': [], 'flirt': [], 'fnirt': []}
+        self.pairwise_diff = {}
+        
+    def pairwise_difference(self, elecs_files):
+        self.set_xfms_dict(elecs_files)
+        keys = self.xfms.keys()
+        for i in range(len(keys)-1):
+            for j in range(i+1,len(keys)):
+                dist = np.sqrt((self.xfms[keys[i]]-self.xfms[keys[j]])**2.0)
+                self.pairwise_diff[keys[i]+'_v_'+keys[j]] = dist
+        return self.pairwise_diff
+    
+    def set_xfms_dict(self, elecs_files):
+        keys = self.xfms.keys()
+        for key in keys:
+            for elec in elecs_files:
+                if key in elec:
+                    self.xfms[key] = utils.fcsv2mat(elec)
         

@@ -8,7 +8,18 @@ import nibabel as nib
 from datetime import datetime
 import csv
 
-def save_fcsv(filename, mat):
+def save_fcsv(fcsv_file,xfm_file, mat):
+    content = load_fcsv2list(fcsv_file)
+    outbasename = os.path.splitext(xfm_file)[0]
+    for i in range(3, len(content)):
+            content[i][1:4]=mat[i-3].astype(np.str)[0:3]
+    with open(outbasename+'.fcsv','wb') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        for row in content:
+            writer.writerow(row)
+    return outbasename+'.fcsv'
+        
+    
 
 def load_fcsv2list(filename):
     content = []
@@ -53,30 +64,34 @@ def vox2mm(filename, nii):
     
     
 def apply_spm(elecs_file,reorient_file):
-    elec = load_elecmatrix(elecs_file)
+    elec_mat = fcsv2mat(elecs_file)
     transform_name = os.path.basename(os.path.splitext(reorient_file)[0])
     rmat = scipy.io.loadmat(reorient_file)['M']
-    elecs_reoriented = nib.affines.apply_affine(rmat,elec)
-    np.savetxt(os.path.splitext(elecs_file)[0]+'_spm'+'.csv', elecs_reoriented, delimiter=",")
-    reoriented_elecs_file = os.path.splitext(elecs_file)[0]+'_spm_'+transform_name+'.mat'
-    save_elecmatrix(reoriented_elecs_file, elecs_reoriented)
+    elec_mat = np.diag([1,-1,1]).dot(elec_mat.T).T
+    elecs_reoriented = nib.affines.apply_affine(rmat,elec_mat)
+    elecs_reoriented = np.diag([1,-1,1]).dot(elecs_reoriented.T).T
+    xfm_file=os.path.splitext(elecs_file)[0]+'_xfm_spm'+'.csv'
+    np.savetxt(xfm_file, elecs_reoriented, delimiter=",")
+    save_fcsv(elecs_file, xfm_file, elecs_reoriented)
+    print(str(elecs_reoriented))
 
-def csv2elecs(filename, fromLPS=False):
+def csv2mat(filename, fromLPS=False, cut_first=True):
     basename = os.path.splitext(filename)[0]
     mat = np.loadtxt(open(filename, "rb"), delimiter=",")
     if fromLPS:
         M = np.diag([-1,-1,1])
         mat = M.dot(mat.T).T
-    save_fcsv(basename+'.fcsv', mat)
+    if cut_first:
+        mat = mat[1:]
+    return mat
 
-def txt2elecs(filename):
+def txt2mat(filename):
     basename = os.path.splitext(filename)[0]
     try:
         mat = np.loadtxt(open(filename, "rb"), delimiter=" ")
     except:
         mat = np.loadtxt(open(filename, "rb"), delimiter="  ")
-        
-    save_fcsv(basename+'.fcsv',mat)
+    return mat
 
 def elecs2csv(filename, toLPS = False, mat = False):
     basename = os.path.splitext(filename)[0]

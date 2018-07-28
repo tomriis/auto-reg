@@ -57,7 +57,7 @@ class Pipeline(object):
         for elec in elecs_files:
             print("---- Processing : "+elec)
             self.flirt_xfm2elecs(elec)
-            self.fnirt_xfm2elecs(elec)
+            #self.fnirt_xfm2elecs(elec)
             self.ants_xfm2elecs(elec)
             self.spm_xfm2elecs(elec)
             
@@ -103,7 +103,8 @@ class Pipeline(object):
         self.platforms['ants'].set_params()
         self.platforms['spm'].set_params()
     def update_input_files(self):
-        self.platforms['fsl'].p['input']=self.patient.CT        
+        self.platforms['fsl'].p['input']=self.patient.CT
+        self.platforms['fsl'].p['aff']=self.flirt_omat
         self.platforms['ants'].p['moving'] = self.patient.CT
         self.platforms['spm'].p['source_img'] = self.patient.CT
     def update_ref_files(self):
@@ -114,6 +115,7 @@ class Pipeline(object):
         self.platforms['fsl'].p['out']=self.coreg_out['fsl']+'/flirt_out'
         self.platforms['fsl'].p['omat']=self.coreg_out['fsl']+'/flirt_omat.mat'
         self.platforms['fsl'].p['cout']=self.coreg_out['fsl']+'/fnirt_cout'
+        self.platforms['fsl'].p['iout']=self.coreg_out['fsl']+ '/fnirt_out'
         self.platforms['ants'].p['o']=self.coreg_out['ants']+'/ants_'
         self.platforms['spm'].p['output_dir']=os.path.join(self.patient.patient_dir,'/acpc/')
     def set_directory_structure(self):

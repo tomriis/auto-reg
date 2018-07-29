@@ -124,10 +124,22 @@ class Pipeline(object):
                 os.makedirs(self.coreg_out[method])
 
 class Metrics(object):
-    def __init__(self):
-        self.xfms =  {'ants': [], 'flirt': [],'spm':[], 'fnirt': []}
-        self.elecs_groups = {}
+    def __init__(self, subjects_list):
+        self.xfms =  {'ants': [], 'flirt': [],'spm':[], 'bspline': []}
+        self.patients = dict([(subject, img_pipe.freeCoG(subj=subject, hem = 'stereo')) for subject in subjects_list])
+
+    def metric_pairwise_difference(self):
+        # Group the electrodes for each patient
+        for key, patient in self.patients.iteritems():
+            patient.elecs = glob.glob(patient.elecs_dir+'/*.fcsv')
+            patient.elecs_groups = self.group_by_base(patient.elecs, basename_length = 4)
+        # Calculate pairwise difference for each patient
+
+        # Save pairwise difference file for each patient
+
+        # Concatenate and save meta pairwise difference file of all patients
         
+        pass
     def pairwise_difference(self, elecs_files):
         self.set_xfms_dict(elecs_files)
         keys = self.xfms.keys()
@@ -144,13 +156,17 @@ class Metrics(object):
             for elec in elecs_files:
                 if key in elec:
                     self.xfms[key] = utils.fcsv2mat(elec)
-    def group_by_base(self, elecs_files, basename):
+    def group_by_base(self, elecs_files, basename_length = 4):
         # Groups list of elec files by the number following the basename
-        base = os.path.dirname(elecs_files[0])+'/'+basename
-        groups = np.unique([elec[len(base):len(base)+2] for elec in elecs_files])
+        elecs_groups = {}
+        base = os.path.dirname(elecs_files[0])+'/'
+        basename = elecs_files[0][len(base):len(base)+basename_length]
+        groups = np.unique([elec[len(base)+basename_length:len(base)+basename_length+2] for elec in elecs_files])
         for num in groups:
-            self.elecs_groups[basename+num] = [f for f in elecs_files if base+num in f]
-        return self.elecs_groups
+            if '.' in num: #condition for unregistered CT elecs file
+                continue
+            elecs_groups[basename+num] = [f for f in elecs_files if base+basename+num in f]
+        return elecs_groups
     def concat_all(self, elecs_dict):
         keys = self.xfms.keys()
         diffs_all = {}

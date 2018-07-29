@@ -10,6 +10,7 @@ import platforms
 import img_pipe
 import utils
 import numpy as np
+import json
 
 class Pipeline(object):
     def __init__(self,subj):
@@ -125,29 +126,39 @@ class Pipeline(object):
 
 class Metrics(object):
     def __init__(self, subjects_list):
+        self.subjects_list = subjects_list
         self.xfms =  {'ants': [], 'flirt': [],'spm':[], 'bspline': []}
         self.patients = dict([(subject, img_pipe.freeCoG(subj=subject, hem = 'stereo')) for subject in subjects_list])
 
-    def metric_pairwise_difference(self):
+    def metric_pairwise_difference(self,outfile = None):
+        pairwise_diff_all = {}
         # Group the electrodes for each patient
-        for key, patient in self.patients.iteritems():
+        for name, patient in self.patients.iteritems():
             patient.elecs = glob.glob(patient.elecs_dir+'/*.fcsv')
             patient.elecs_groups = self.group_by_base(patient.elecs, basename_length = 4)
         # Calculate pairwise difference for each patient
-
+            patient.pairwise_diff={}
+            for elec, elec_group in patient.elecs_groups.iteritems(): 
+                patient.pairwise_diff[elec] = self.pairwise_difference(elec_group)
         # Save pairwise difference file for each patient
-
+            filename = patient.subj_dir+'/'+patient.subj+'/'+'elecs_all.json'
+            patient_diff_all = self.pairwise_diff_to_json_derulo(filename, patient.pairwise_diff)
         # Concatenate and save meta pairwise difference file of all patients
-        
-        pass
+            pairwise_diff_all[name]=patient_diff_all
+        if outfile==None:
+            outfile = self.patients[self.subjects_list[0]].subj_dir+'/'+'elecs_diff_all.json'
+        diff_all_patients = self.pairwise_diff_to_json_derulo(outfile, pairwise_diff_all)
+        return diff_all_patients
+    
     def pairwise_difference(self, elecs_files):
         self.set_xfms_dict(elecs_files)
         keys = self.xfms.keys()
+        keys.sort()
         pairwise_diff = {}
         for i in range(len(keys)-1):
             for j in range(i+1,len(keys)):
-                dist = np.sqrt((self.xfms[keys[i]]-self.xfms[keys[j]])**2.0)
-                pairwise_diff[keys[i]+'_v_'+keys[j]] = dist
+                diff = self.xfms[keys[i]]-self.xfms[keys[j]]
+                pairwise_diff[keys[i]+'_sub_'+keys[j]] = diff
         return pairwise_diff
     
     def set_xfms_dict(self, elecs_files):
@@ -167,12 +178,19 @@ class Metrics(object):
                 continue
             elecs_groups[basename+num] = [f for f in elecs_files if base+basename+num in f]
         return elecs_groups
-    def concat_all(self, elecs_dict):
+    def pairwise_diff_to_json_derulo(self, filename, pd_dict):
+        # Concatenate dictionary along common keys
+        diffs_all = self._concat_all(pd_dict)
+        with open(filename, 'w') as fp:
+            json.dump(data, fp)
+        return diffs_all
+    def _concat_all(self, elecs_dict):
         keys = self.xfms.keys()
+        keys.sort()
         diffs_all = {}
         for i in range(len(keys)-1):
             for j in range(i+1,len(keys)):
-                current_pair = keys[i]+'_v_'+keys[j]
+                current_pair = keys[i]+'_sub_'+keys[j]
                 diffs_all[current_pair] = np.array([]).reshape(0,3)
                 for group in elecs_dict.keys():
                     for pair in elecs_dict[group].keys():

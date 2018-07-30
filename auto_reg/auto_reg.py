@@ -27,14 +27,14 @@ class Pipeline(object):
                           'ants': os.path.join(self.patient.patient_dir, 'coreg_ants'),
                           'spm':os.path.join(self.patient.patient_dir, 'coreg_spm')}
         
-        self.update_param_files()
-        self.set_directory_structure()
-
         self.ants_warp = os.path.join(self.coreg_out['ants'],'ants_1Warp.nii.gz')
         self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAffine.mat')
         self.ants_invwarp = os.path.join(self.coreg_out['ants'],'ants_1InverseWarp.nii.gz')
         self.fnirt_warp = os.path.join(self.coreg_out['fsl'],'fnirt_cout.nii.gz')
         self.flirt_omat = os.path.join(self.coreg_out['fsl'],'flirt_omat.mat')
+
+        self.update_param_files()
+        self.set_directory_structure()
         
     def preprocess(self):
         self.patient.prep_recon()
@@ -142,9 +142,9 @@ class Metrics(object):
                 patient.pairwise_diff[elec] = self.pairwise_difference(elec_group)
         # Save pairwise difference file for each patient
             filename = patient.subj_dir+'/'+patient.subj+'/'+'elecs_all.json'
-            patient_diff_all = self.pairwise_diff_to_json_derulo(filename, patient.pairwise_diff)
+            patient.diff_all = self.pairwise_diff_to_json_derulo(filename, patient.pairwise_diff)
         # Concatenate and save meta pairwise difference file of all patients
-            pairwise_diff_all[name]=patient_diff_all
+            pairwise_diff_all[name]=patient.diff_all
         if outfile==None:
             outfile = self.patients[self.subjects_list[0]].subj_dir+'/'+'elecs_diff_all.json'
         diff_all_patients = self.pairwise_diff_to_json_derulo(outfile, pairwise_diff_all)
@@ -182,7 +182,7 @@ class Metrics(object):
         # Concatenate dictionary along common keys
         diffs_all = self._concat_all(pd_dict)
         with open(filename, 'w') as fp:
-            json.dump(data, fp)
+            json.dump(utils.dict_numpy2list(diffs_all), fp)
         return diffs_all
     def _concat_all(self, elecs_dict):
         keys = self.xfms.keys()
@@ -197,4 +197,6 @@ class Metrics(object):
                         if keys[i] in pair and keys[j] in pair:
                             diffs_all[current_pair]=np.concatenate((diffs_all[current_pair], elecs_dict[group][pair]), axis = 0)
         return diffs_all
+    def comp_stats(self, pairwise_diff_all):
+        pass
         

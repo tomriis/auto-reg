@@ -8,6 +8,12 @@ import nibabel as nib
 from datetime import datetime
 import csv
 
+def dict_numpy2list(numpydict):
+    new_dict = {}
+    for k, v in numpydict.iteritems():
+        new_dict[k] = v.tolist()
+    return new_dict
+
 def save_fcsv(fcsv_file,xfm_file, mat, rmv = True):
     content = load_fcsv2list(fcsv_file)
     outbasename = os.path.splitext(xfm_file)[0]
@@ -20,8 +26,6 @@ def save_fcsv(fcsv_file,xfm_file, mat, rmv = True):
     if rmv == True:
         os.remove(xfm_file)
     return outbasename+'.fcsv'
-        
-    
 
 def load_fcsv2list(filename):
     content = []

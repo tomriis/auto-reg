@@ -1,101 +1,35 @@
 #auto_reg.py
-""" User interface for running all software pipelines on two files"""
 import os
 import glob
-#import Tkinter
-#from Tkconstants import *
-#tk = Tkinter.Tk()
 
 import platforms
-import img_pipe
 import utils
 import numpy as np
 import json
 
-class Pipeline(object):
-    def __init__(self,subj):
-        self.subj = subj
-        self.patient = img_pipe.freeCoG(subj=self.subj, hem = 'stereo')
-        self.patient.CT = os.path.join(self.patient.CT_dir, 'CT.nii')
-        self.patient.T1 = os.path.join(self.patient.acpc_dir, 'T1.nii')
+
+class Patient(object):
+    """Class to define appropriate directory structure for each patient"""
+    def __init__(self,patient_dir):
+        self.patient_dir = patient_dir
+        self.CT = os.path.join(self.patient_dir,'CT', 'CT.nii')
+        self.T1 = os.path.join(self.patient_dir,'acpc', 'T1.nii')
+        self.subj_dir = os.path.dirname(patient_dir) if patient_dir[-1] != '/' else os.path.dirname(patient_dir[:-1])
+        self.elecs_dir = os.path.join(self.patient_dir, 'elecs')
+        self.masks_dir = os.path.join(self.patient_dir, 'masks')
         
+        self.coreg_out = {'fsl':os.path.join(self.patient_dir,'coreg_fsl'),
+                          'ants': os.path.join(self.patient_dir, 'coreg_ants'),
+                          'spm':os.path.join(self.patient_dir, 'coreg_spm')}
         self.platforms ={'fsl': platforms.Fsl(),
                          'ants':platforms.Ants(),
                          'spm':platforms.SPM()}
-
-        self.coreg_out = {'fsl':os.path.join(self.patient.patient_dir,'coreg_fsl'),
-                          'ants': os.path.join(self.patient.patient_dir, 'coreg_ants'),
-                          'spm':os.path.join(self.patient.patient_dir, 'coreg_spm')}
-        
         self.ants_warp = os.path.join(self.coreg_out['ants'],'ants_1Warp.nii.gz')
         self.ants_mat = os.path.join(self.coreg_out['ants'],'ants_0GenericAffine.mat')
         self.ants_invwarp = os.path.join(self.coreg_out['ants'],'ants_1InverseWarp.nii.gz')
         self.fnirt_warp = os.path.join(self.coreg_out['fsl'],'fnirt_cout.nii.gz')
         self.flirt_omat = os.path.join(self.coreg_out['fsl'],'flirt_omat.mat')
 
-        self.update_param_files()
-        self.set_directory_structure()
-        
-    def preprocess(self):
-        self.patient.prep_recon()
-        self.patient.get_recon()
-        self.patient.convert_fsmesh2mlab()
-        self.patient.get_subcort()
-
-    def coregister(self, methods = []):
-        if len(methods) == 0:
-            methods = self.platforms.keys()
-        for method in methods:
-            if method == 'fsl':
-                self.platforms['fsl'].flirt()
-                self.platforms['fsl'].fnirt()
-            elif method == 'ants':
-                self.platforms['ants'].antsRegistrationSynQuick()
-            elif method == 'spm':
-                self.platforms['spm'].coregister_estimate()
-    def apply_xfms2elecs(self):
-        elecs_files = glob.glob(self.patient.elecs_dir+'/*.fcsv')   
-        for elec in elecs_files:
-            print("---- Processing : "+elec)
-            self.flirt_xfm2elecs(elec)
-            #self.fnirt_xfm2elecs(elec)
-            self.ants_xfm2elecs(elec)
-            self.spm_xfm2elecs(elec)
-            
-    def flirt_xfm2elecs(self, elec):
-        outbasename = os.path.splitext(elec)[0]
-        xfm_file = outbasename+'_xfm_flirt.txt'
-        fmat = utils.fcsv2mat(elec)
-        fsl_source = utils.elecs2txt(elec, mat = fmat)
-        self.platforms['fsl'].apply_flirt2coords(fsl_source, self.patient.CT, self.coreg_out['fsl']+'/flirt_out.nii', self.flirt_omat, xfm_file)
-        rmat = utils.txt2mat(xfm_file)
-        utils.save_fcsv(elec, xfm_file, rmat)
-        
-    def fnirt_xfm2elecs(self, elec):
-        outbasename = os.path.splitext(elec)[0]
-        xfm_file = outbasename+'_xfm_fnirt.txt'
-        fmat = utils.fcsv2mat(elec)
-        fsl_source = utils.elecs2txt(elec,mat=fmat)
-        self.platforms['fsl'].apply_fnirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.fnirt_warp, xfm_file)
-        rmat = utils.txt2mat(xfm_file)
-        utils.save_fcsv(elec, xfm_file, rmat)
-        
-    def ants_xfm2elecs(self, elec, RAS=True):
-        outbasename = os.path.splitext(elec)[0]
-        xfm_file = outbasename+'_xfm_ants.csv'
-        fmat = utils.fcsv2mat(elec)
-        ants_source = utils.elecs2csv(elec, toLPS=RAS, mat = fmat)
-        self.platforms['ants'].antsApplyTransformsToPoints(ants_source, xfm_file, self.ants_invwarp, self.ants_mat)
-        rmat = utils.csv2mat(xfm_file, fromLPS=RAS)
-        utils.save_fcsv(elec, xfm_file, rmat)
-        
-    def spm_xfm2elecs(self, elec, reorient_file = None):
-        if reorient_file == None:
-            reorient_file = self.coreg_out['spm']+'/matrix.mat'
-        utils.apply_spm(elec, reorient_file)
-        
-    def evaluate(self):
-        elecs_files = glob.glob(self.patient.elecs_dir+'/*.fcsv')
     def update_param_files(self):
         self.update_input_files()
         self.update_ref_files()
@@ -124,11 +58,75 @@ class Pipeline(object):
             if not os.path.exists(self.coreg_out[method]):
                 os.makedirs(self.coreg_out[method])
 
+
+class Pipeline(object):
+    def __init__(self,subj_dir):
+        self.patient = Patient(subj)
+        self.patient.update_param_files()
+        self.patient.set_directory_structure()
+
+    def coregister(self, methods = []):
+        if len(methods) == 0:
+            methods = self.patient.platforms.keys()
+        for method in methods:
+            if method == 'fsl':
+                self.patient.platforms['fsl'].flirt()
+                #self.patient.platforms['fsl'].fnirt()
+            elif method == 'ants':
+                self.patient.platforms['ants'].antsRegistrationSynQuick()
+            elif method == 'spm':
+                self.patient.platforms['spm'].coregister_estimate()
+                
+    def apply_xfms2elecs(self):
+        elecs_files = glob.glob(self.patient.elecs_dir+'/*.fcsv')   
+        for elec in elecs_files:
+            print("---- Processing : "+elec)
+            self.flirt_xfm2elecs(elec)
+            #self.fnirt_xfm2elecs(elec)
+            self.ants_xfm2elecs(elec)
+            self.spm_xfm2elecs(elec)
+            
+    def flirt_xfm2elecs(self, elec):
+        outbasename = os.path.splitext(elec)[0]
+        xfm_file = outbasename+'_xfm_flirt.txt'
+        fmat = utils.fcsv2mat(elec)
+        fsl_source = utils.elecs2txt(elec, mat = fmat)
+        self.patient.platforms['fsl'].apply_flirt2coords(fsl_source, self.patient.CT,
+                                                         self.patient.coreg_out['fsl']+'/flirt_out.nii',
+                                                         self.patient.flirt_omat, xfm_file)
+        rmat = utils.txt2mat(xfm_file)
+        utils.save_fcsv(elec, xfm_file, rmat)
+        
+    def fnirt_xfm2elecs(self, elec):
+        outbasename = os.path.splitext(elec)[0]
+        xfm_file = outbasename+'_xfm_fnirt.txt'
+        fmat = utils.fcsv2mat(elec)
+        fsl_source = utils.elecs2txt(elec,mat=fmat)
+        self.patient.platforms['fsl'].apply_fnirt2coords(fsl_source, self.patient.CT, self.patient.T1, self.patient.fnirt_warp, xfm_file)
+        rmat = utils.txt2mat(xfm_file)
+        utils.save_fcsv(elec, xfm_file, rmat)
+        
+    def ants_xfm2elecs(self, elec, RAS=True):
+        outbasename = os.path.splitext(elec)[0]
+        xfm_file = outbasename+'_xfm_ants.csv'
+        fmat = utils.fcsv2mat(elec)
+        ants_source = utils.elecs2csv(elec, toLPS=RAS, mat = fmat)
+        self.patient.platforms['ants'].antsApplyTransformsToPoints(ants_source, xfm_file, self.patient.ants_invwarp, self.patient.ants_mat)
+        rmat = utils.csv2mat(xfm_file, fromLPS=RAS)
+        utils.save_fcsv(elec, xfm_file, rmat)
+        
+    def spm_xfm2elecs(self, elec, reorient_file = None):
+        if reorient_file == None:
+            reorient_file = self.patient.coreg_out['spm']+'/matrix.mat'
+        utils.apply_spm(elec, reorient_file)
+        
+
+
 class Metrics(object):
     def __init__(self, subjects_list):
         self.subjects_list = subjects_list
         self.xfms =  {'ants': [], 'flirt': [],'spm':[], 'bspline': []}
-        self.patients = dict([(subject, img_pipe.freeCoG(subj=subject, hem = 'stereo')) for subject in subjects_list])
+        self.patients = dict([(subject, Patient(subject)) for subject in subjects_list])
 
     def metric_pairwise_difference(self,outfile = None):
         pairwise_diff_all = {}
@@ -141,7 +139,7 @@ class Metrics(object):
             for elec, elec_group in patient.elecs_groups.iteritems(): 
                 patient.pairwise_diff[elec] = self.pairwise_difference(elec_group)
         # Save pairwise difference file for each patient
-            filename = patient.subj_dir+'/'+patient.subj+'/'+'elecs_all.json'
+            filename = patient.patient_dir+'/'+'elecs_all.json'
             patient.diff_all = self.pairwise_diff_to_json_derulo(filename, patient.pairwise_diff)
         # Concatenate and save meta pairwise difference file of all patients
             pairwise_diff_all[name]=patient.diff_all
@@ -197,6 +195,5 @@ class Metrics(object):
                         if keys[i] in pair and keys[j] in pair:
                             diffs_all[current_pair]=np.concatenate((diffs_all[current_pair], elecs_dict[group][pair]), axis = 0)
         return diffs_all
-    def comp_stats(self, pairwise_diff_all):
-        pass
+
         

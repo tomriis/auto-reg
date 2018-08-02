@@ -8,13 +8,6 @@ try:
 except:
     print("Please set up Python Matlab Engine to use SPM")
 
-try:
-    import img_pipe
-except:
-    print("Please make sure you actiated the img_pipe conda environment")
-
-
-
 class Platform(object):
     def __init__(self):
         self.p = {}
@@ -84,11 +77,5 @@ class SPM(Platform):
         eng.coregister_estimate(self.p['ref_img'],self.p['source_img'], self.p['output_dir'])
     def spm_D(self):
 	eng.spm_D()
-
-
-class Freesurfer(Platform):
-    def __init__(self, subj, hem):
-        super(Freesurfer, self).__init__()
-        self.patient = img_pipe.freeCoG(subj=subj, hem = hem)
 
         

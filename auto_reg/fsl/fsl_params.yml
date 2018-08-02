@@ -1,9 +1,9 @@
 # FSL Parameters
 
 # Brain Extraction Tool (bet)
-bet_input: /Applications/fsl/test_subj/CT/CT.nii
-bet_output: /Applications/fsl/test_subj/acpc/CT_Ext.nii
-f: 0.5      # Fractional Intensity Threshold (0->1); default=0.5
+bet_input: /Applications/freesurfer/subjects/CS201808/CT/CT.nii
+bet_output: /Applications/freesurfer/subjects/CS201808/CT_Ext.nii
+f: 0.1      # Fractional Intensity Threshold (0->1); default=0.5
 g: 0        # Vertical gradient in fractional intensity (-1->1); default=0
 
 # Segmentation (fast)

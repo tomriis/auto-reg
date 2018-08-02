@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function execute_bet() {
-    echo $(bet $1 $2 -f $3 -g $4)
+    echo $(bet $1 $2 -f $3 -g $4 -B -s)
 }
 
 function execute_fast(){

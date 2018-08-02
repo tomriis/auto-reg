@@ -137,3 +137,13 @@ def resave_data(nifti_orig, data):
     hdr = nifti_orig.header.copy()
     new_img = nib.nifti1.Nifti1Image(data, None, header = hdr)
     return new_img
+
+def to_hu(n1_img, filename, threshold = [0, 100]):
+    data = n1_img.get_data()
+    data = data * n1_img.dataobj.slope + n1_img.dataobj.inter
+    mask1 = data > threshold[1]
+    mask2 = data < threshold[0]
+    mask_all = np.ma.mask_or(mask1, mask2)
+    data[mask_all] = 0
+    new_img = resave_data(n1_img, data)
+    nib.save(new_img, filename)

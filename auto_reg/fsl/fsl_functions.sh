@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function execute_bet() {
-    echo $(bet $1 $2 -f $3 -g $4)
+    echo $(bet $1 $2 -f $3 -g $4 -B -s)
 }
 
 function execute_fast(){
@@ -23,7 +23,7 @@ function apply_flirt2coords(){
 }
 
 function execute_fnirt(){
-    echo $(fnirt --ref=$1 --in=$2 --cout=$3)
+    echo $(fnirt --ref=$1 --in=$2 --aff=$3 --cout=$4 --iout=$5)
 }
 
 function apply_fnirt(){

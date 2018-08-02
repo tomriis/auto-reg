@@ -42,7 +42,7 @@ class Fsl(Platform):
         opts=['bash',Fsl.callstring,'execute_flirt', self.p['input'], self.p['ref'], self.p['out'], self.p['omat'],str(self.p['bins']),self.p['cost'],self.p['searchrx'],self.p['searchry'],self.p['searchrz'],str(self.p['dof']),self.p['interp']]
         subprocess.call(opts)
     def fnirt(self):
-        opts=['bash',Fsl.callstring, 'execute_fnirt', self.p['ref'], self.p['input'],self.p['cout']]
+        opts=['bash',Fsl.callstring, 'execute_fnirt', self.p['ref'], self.p['input'],self.p['aff'], self.p['cout'], self.p['iout']]
         subprocess.call(opts)
     def apply_flirt(self, invol, refvol, invol2refvolmat, out):
         opts=['bash',Fsl.callstring, 'apply_flirt',invol,refvol,out, invol2refvolmat]

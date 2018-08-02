@@ -1,6 +1,6 @@
 # spm_params.yml
 
 #Coregistration - Estimate and reslice
-ref_img: '/Applications/freesurfer/subjects/CS201802/acpc/T1.nii'
-source_img: '/Applications/freesurfer/subjects/CS201802/CT/CT.nii'
+ref_img: '/Applications/freesurfer/subjects/CS201808/acpc/T1.nii'
+source_img: '/Applications/freesurfer/subjects/CS201808/CT/CT.nii'
 output_dir: '/acpc/'

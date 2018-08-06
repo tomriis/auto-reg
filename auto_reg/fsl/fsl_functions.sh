@@ -13,7 +13,7 @@ function execute_flirt(){
 }
 
 function apply_flirt(){
-    echo $(flirt -in $1 -ref $2 -out $3 --init $4 -applyxfm)
+    echo $(flirt -in $1 -ref $2 -out $3 -init $4 -applyxfm)
 }
 
 function apply_flirt2coords(){

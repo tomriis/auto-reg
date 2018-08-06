@@ -67,7 +67,10 @@ def vox2mm(filename, nii):
     out_filename = os.path.splitext(filename)[0]+'_mm.mat'
     save_elecmatrix(out_filename, mm_coords)
     return out_filename
-    
+
+def spm_mat_to_ascii_mat(spm_mat_filename, out_filename):
+    rmat = scipy.io.loadmat(spm_mat_filename)['M']
+    np.savetxt(out_filename,np.linalg.inv(rmat))
     
 def apply_spm(elecs_file,reorient_file):
     elec_mat = fcsv2mat(elecs_file)

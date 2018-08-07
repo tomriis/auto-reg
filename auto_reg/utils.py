@@ -70,6 +70,7 @@ def vox2mm(filename, nii):
 
 def spm_mat_to_ascii_mat(spm_mat_filename, out_filename):
     rmat = scipy.io.loadmat(spm_mat_filename)['M']
+    M = np.diag([-1,1,1])
     np.savetxt(out_filename,np.linalg.inv(rmat))
     
 def apply_spm(elecs_file,reorient_file):

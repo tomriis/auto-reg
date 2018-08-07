@@ -38,21 +38,21 @@ class Patient(object):
         self.platforms['ants'].set_params()
         self.platforms['spm'].set_params()
     def update_input_files(self):
-        self.platforms['fsl'].p['input']=self.patient.CT
+        self.platforms['fsl'].p['input']=self.CT
         self.platforms['fsl'].p['aff']=self.flirt_omat
-        self.platforms['ants'].p['moving'] = self.patient.CT
-        self.platforms['spm'].p['source_img'] = self.patient.CT
+        self.platforms['ants'].p['moving'] = self.CT
+        self.platforms['spm'].p['source_img'] = self.CT
     def update_ref_files(self):
-        self.platforms['fsl'].p['ref']=self.patient.T1
-        self.platforms['ants'].p['fixed'] = self.patient.T1
-        self.platforms['spm'].p['ref_img'] = self.patient.T1
+        self.platforms['fsl'].p['ref']=self.T1
+        self.platforms['ants'].p['fixed'] = self.T1
+        self.platforms['spm'].p['ref_img'] = self.T1
     def update_out_files(self):
         self.platforms['fsl'].p['out']=self.coreg_out['fsl']+'/flirt_out'
         self.platforms['fsl'].p['omat']=self.coreg_out['fsl']+'/flirt_omat.mat'
         self.platforms['fsl'].p['cout']=self.coreg_out['fsl']+'/fnirt_cout'
         self.platforms['fsl'].p['iout']=self.coreg_out['fsl']+ '/fnirt_out'
         self.platforms['ants'].p['o']=self.coreg_out['ants']+'/ants_'
-        self.platforms['spm'].p['output_dir']=os.path.join(self.patient.patient_dir,'/acpc/')
+        self.platforms['spm'].p['output_dir']=os.path.join(self.patient_dir,'/acpc/')
     def set_directory_structure(self):
         for method in self.platforms.keys():
             if not os.path.exists(self.coreg_out[method]):
@@ -61,7 +61,7 @@ class Patient(object):
 
 class Pipeline(object):
     def __init__(self,subj_dir):
-        self.patient = Patient(subj)
+        self.patient = Patient(subj_dir)
         self.patient.update_param_files()
         self.patient.set_directory_structure()
 

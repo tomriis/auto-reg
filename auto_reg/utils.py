@@ -69,10 +69,9 @@ def vox2mm(filename, nii):
     return out_filename
 
 def spm_mat_to_ascii_mat(spm_mat_filename, out_filename):
-    rmat = scipy.io.loadmat(spm_mat_filename)['M']
-    M = np.diag([-1,1,1])
-    np.savetxt(out_filename,np.linalg.inv(rmat))
-    
+     rmat = scipy.io.loadmat(spm_mat_filename)['M']
+     np.savetxt(out_filename,rmat)
+     
 def apply_spm(elecs_file,reorient_file):
     elec_mat = fcsv2mat(elecs_file)
     transform_name = os.path.basename(os.path.splitext(reorient_file)[0])
@@ -142,12 +141,13 @@ def resave_data(nifti_orig, data):
     new_img = nib.nifti1.Nifti1Image(data, None, header = hdr)
     return new_img
 
-def to_hu(n1_img, filename, threshold = [0, 100]):
+def to_hu(n1_img, filename, threshold = [500, 1500]):
     data = n1_img.get_data()
-    data = data * n1_img.dataobj.slope + n1_img.dataobj.inter
+    #data = data * n1_img.dataobj.slope + n1_img.dataobj.inter
     mask1 = data > threshold[1]
     mask2 = data < threshold[0]
     mask_all = np.ma.mask_or(mask1, mask2)
     data[mask_all] = 0
     new_img = resave_data(n1_img, data)
     nib.save(new_img, filename)
+

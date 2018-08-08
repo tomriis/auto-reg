@@ -127,7 +127,26 @@ class Metrics(object):
         self.subjects_list = subjects_list
         self.xfms =  {'ants': [], 'flirt': [],'spm':[], 'bspline': []}
         self.patients = dict([(subject, Patient(subject)) for subject in subjects_list])
+    def metric_dice_sorenson(self, threshold=[500,1500],outfile=None):
+        for name, patient in self.patients.iteritems():
+            self.create_CT_skull_mask(patient)
+            CT_mask_name=patient.masks_dir+'/CT_skull_mask'+str(threshold[1])+'.nii.gz'
+            patient.platforms['fsl'].apply_flirt(CT_mask_name,
+                                                 patient.T1,
+                                                 patient.flirt_omat,
+                                                 patient.masks_dir+'/flirt_CT_skull_mask'+str(threshold[1])+'.nii.gz')
 
+            patient.platforms['ants'].antsApplyTransforms(CT_mask_name,
+                                                          patient.T1,
+                                                          patient.coreg_out['ants']+'/ants_1Warp.nii.gz',
+                                                          patient.coreg_out['ants']+'/ants_0GenericAffine.mat',
+                                                          patient.masks_dir+'/ants_CT_skull_mask'+str(threshold[1])+'.nii.gz')
+
+            # Bspline and SPM must be done independently 
+    def create_CT_skull_mask(self, patient,threshold = [500, 1500]):
+        ct_img = utils.load_file(patient.CT)
+        utils.to_hu(ct_img, patient.masks_dir+'/CT_skull_mask'+str(threshold[1])+ '.nii.gz',threshold = threshold)
+        
     def metric_pairwise_difference(self,outfile = None):
         pairwise_diff_all = {}
         # Group the electrodes for each patient

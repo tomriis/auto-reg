@@ -1,9 +1,9 @@
  #Parameters for Ants image registration functions
 
 # antsRegistration
-fixed: /Applications/freesurfer/subjects/CS201808/acpc/T1.nii
-moving: /Applications/freesurfer/subjects/CS201808/CT/CT.nii
-o: /Applications/freesurfer/subjects/CS201808/coreg_ants/ants_ # Output Prefix: prefix that is prepended to all output files
+fixed: /Applications/freesurfer/subjects/CS201807/acpc/T1.nii
+moving: /Applications/freesurfer/subjects/CS201807/CT/CT.nii
+o: /Applications/freesurfer/subjects/CS201807/coreg_ants/ants_ # Output Prefix: prefix that is prepended to all output files
 # For warping input images, the reference image defines the spacing
 # origin, size and direction of the output warped image
 t: s                                                                     # Transform type (default = 's')

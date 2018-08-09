@@ -38,21 +38,21 @@ class Patient(object):
         self.platforms['ants'].set_params()
         self.platforms['spm'].set_params()
     def update_input_files(self):
-        self.platforms['fsl'].p['input']=self.patient.CT
+        self.platforms['fsl'].p['input']=self.CT
         self.platforms['fsl'].p['aff']=self.flirt_omat
-        self.platforms['ants'].p['moving'] = self.patient.CT
-        self.platforms['spm'].p['source_img'] = self.patient.CT
+        self.platforms['ants'].p['moving'] = self.CT
+        self.platforms['spm'].p['source_img'] = self.CT
     def update_ref_files(self):
-        self.platforms['fsl'].p['ref']=self.patient.T1
-        self.platforms['ants'].p['fixed'] = self.patient.T1
-        self.platforms['spm'].p['ref_img'] = self.patient.T1
+        self.platforms['fsl'].p['ref']=self.T1
+        self.platforms['ants'].p['fixed'] = self.T1
+        self.platforms['spm'].p['ref_img'] = self.T1
     def update_out_files(self):
         self.platforms['fsl'].p['out']=self.coreg_out['fsl']+'/flirt_out'
         self.platforms['fsl'].p['omat']=self.coreg_out['fsl']+'/flirt_omat.mat'
         self.platforms['fsl'].p['cout']=self.coreg_out['fsl']+'/fnirt_cout'
         self.platforms['fsl'].p['iout']=self.coreg_out['fsl']+ '/fnirt_out'
         self.platforms['ants'].p['o']=self.coreg_out['ants']+'/ants_'
-        self.platforms['spm'].p['output_dir']=os.path.join(self.patient.patient_dir,'/acpc/')
+        self.platforms['spm'].p['output_dir']=os.path.join(self.patient_dir,'/acpc/')
     def set_directory_structure(self):
         for method in self.platforms.keys():
             if not os.path.exists(self.coreg_out[method]):
@@ -61,7 +61,7 @@ class Patient(object):
 
 class Pipeline(object):
     def __init__(self,subj_dir):
-        self.patient = Patient(subj)
+        self.patient = Patient(subj_dir)
         self.patient.update_param_files()
         self.patient.set_directory_structure()
 
@@ -127,7 +127,26 @@ class Metrics(object):
         self.subjects_list = subjects_list
         self.xfms =  {'ants': [], 'flirt': [],'spm':[], 'bspline': []}
         self.patients = dict([(subject, Patient(subject)) for subject in subjects_list])
+    def metric_dice_sorenson(self, threshold=[500,1500],outfile=None):
+        for name, patient in self.patients.iteritems():
+            self.create_CT_skull_mask(patient)
+            CT_mask_name=patient.masks_dir+'/CT_skull_mask'+str(threshold[1])+'.nii.gz'
+            patient.platforms['fsl'].apply_flirt(CT_mask_name,
+                                                 patient.T1,
+                                                 patient.flirt_omat,
+                                                 patient.masks_dir+'/flirt_CT_skull_mask'+str(threshold[1])+'.nii.gz')
 
+            patient.platforms['ants'].antsApplyTransforms(CT_mask_name,
+                                                          patient.T1,
+                                                          patient.coreg_out['ants']+'/ants_1Warp.nii.gz',
+                                                          patient.coreg_out['ants']+'/ants_0GenericAffine.mat',
+                                                          patient.masks_dir+'/ants_CT_skull_mask'+str(threshold[1])+'.nii.gz')
+
+            # Bspline and SPM must be done independently 
+    def create_CT_skull_mask(self, patient,threshold = [500, 1500]):
+        ct_img = utils.load_file(patient.CT)
+        utils.to_hu(ct_img, patient.masks_dir+'/CT_skull_mask'+str(threshold[1])+ '.nii.gz',threshold = threshold)
+        
     def metric_pairwise_difference(self,outfile = None):
         pairwise_diff_all = {}
         # Group the electrodes for each patient

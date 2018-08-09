@@ -16,11 +16,11 @@ I: 4        # number of main loop iterations in bias field removal; default=4
 l: 20.0     # bias field smoothing extent (FWHM in mm); default=20
 
 # Registration
-input: /Applications/freesurfer/subjects/CS201808/CT/CT.nii
-ref: /Applications/freesurfer/subjects/CS201808/acpc/T1.nii #/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz
+input: /Applications/freesurfer/subjects/CS201807/CT/CT.nii
+ref: /Applications/freesurfer/subjects/CS201807/acpc/T1.nii #/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz
 # Linear (flirt)
-out: /Applications/freesurfer/subjects/CS201808/coreg_fsl/flirt_out
-omat: /Applications/freesurfer/subjects/CS201808/coreg_fsl/flirt_omat.mat
+out: /Applications/freesurfer/subjects/CS201807/coreg_fsl/flirt_out
+omat: /Applications/freesurfer/subjects/CS201807/coreg_fsl/flirt_omat.mat
 bins: 256         # number of histogram bins; default = 256
 cost: corratio    # {mutualinfo, corratio, normcorr, normmi, leastsq,labeldiff,bbr}; default=corratio
 searchrx: -90 90  # <min_angle> <max_angle> (angles in degrees; default= -90 90
@@ -30,7 +30,7 @@ dof: 12           # number of transform degrees of freedom; default = 12
 interp: trilinear # {trilinear, nearestneighbour, sinc, spline}
 
 # Registration Non-Linear (fnirt)
-cout: /Applications/freesurfer/subjects/CS201808/coreg_fsl/fnirt_cout #main output, a 4D nifti-file containing the spline coefficients + affine transform
+cout: /Applications/freesurfer/subjects/CS201807/coreg_fsl/fnirt_cout #main output, a 4D nifti-file containing the spline coefficients + affine transform
 
-iout: /Applications/freesurfer/subjects/CS201808/coreg_fsl/fnirt_out
-aff: /Applications/freesurfer/subjects/CS201808/coreg_fsl/flirt_omat.mat
+iout: /Applications/freesurfer/subjects/CS201807/coreg_fsl/fnirt_out
+aff: /Applications/freesurfer/subjects/CS201807/coreg_fsl/flirt_omat.mat

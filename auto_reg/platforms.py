@@ -75,7 +75,9 @@ class SPM(Platform):
         self.p = utils.get_params(self.params_file)
     def coregister_estimate(self):
         eng.coregister_estimate(self.p['ref_img'],self.p['source_img'], self.p['output_dir'])
+    def coregister_estimate_vol(self, ref_file, in_file):
+    	eng.coreg_estimate_vol(ref_file, in_file)
     def spm_D(self):
-	eng.spm_D()
+		eng.spm_D()
 
         

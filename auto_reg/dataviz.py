@@ -26,10 +26,10 @@ def figure_boxplot(coefs):
     ax2 = sns.swarmplot(x="Overlap", y="Methods", data=df,size=5, linewidth=0,palette=['grey','grey'], hue="Mask", dodge=True, color=".3")
     ax2.color = "black"
     handles, _ = ax2.get_legend_handles_labels()
-    ax2.legend(handles, ["Man", "Woman"])
     ax.xaxis.grid(True)
     ax.set(ylabel="")
     ax.set(xlabel="Similiarity Coefficient")
-    ax.set(title="Sorensen-Dice Overlap")
+    plt.suptitle("Sorensen-Dice Overlap")
     sns.despine(trim=True, left=True)
+    plt.legend(handles, ["Seg3D Mask", "BET Skull Surface"], bbox_to_anchor=(1,0.95),bbox_transform=plt.gcf().transFigure)
     plt.show()

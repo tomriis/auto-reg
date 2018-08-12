@@ -57,9 +57,12 @@ class Patient(object):
         for method in self.platforms.keys():
             if not os.path.exists(self.coreg_out[method]):
                 os.makedirs(self.coreg_out[method])
+        for folder in [self.masks_dir, self.elecs_dir]:    
+            if not os.path.exists(folder)
+                os.makedirs(folder)
 
 
-class Pipeline(object):
+class Registration(object):
     def __init__(self,subj_dir):
         self.patient = Patient(subj_dir)
         self.patient.update_param_files()

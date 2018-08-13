@@ -141,7 +141,7 @@ def resave_data(nifti_orig, data):
     new_img = nib.nifti1.Nifti1Image(data, None, header = hdr)
     return new_img
 
-def to_hu(n1_img, filename, threshold = [500, 1500]):
+def threshold_image(n1_img, filename, threshold = [500, 1500]):
     data = n1_img.get_data()
     #data = data * n1_img.dataobj.slope + n1_img.dataobj.inter
     mask1 = data > threshold[1]
